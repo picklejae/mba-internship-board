@@ -108,7 +108,7 @@ I acted as the product owner: I defined the problem, set the requirements, ran f
 ## Run the demo locally
 
 ```bash
-git clone https://github.com/<your-username>/mba-internship-board.git
+git clone https://github.com/picklejae/mba-internship-board.git
 cd mba-internship-board
 open index.html          # macOS. On Windows: start index.html
 ```
