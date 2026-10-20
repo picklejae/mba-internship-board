@@ -1,4 +1,4 @@
-# MBA Internship Board
+# Internship Compiler (MBA Internship Board)
 
 **A shared job board that I designed and run for my MBA classmates.** It collects Summer 2027 internships at tech and corporate employers into one list, refreshes twice a day, and gives each person a private application pipeline.
 

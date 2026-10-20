@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>MBA Internship Board</title>
+<title>Internship Compiler (Demo)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
@@ -29,6 +29,9 @@ header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items
 .stamps dt{color:var(--muted);text-align:right}
 .stamps dd{margin:0;font-weight:700;color:var(--star);font-variant-numeric:tabular-nums}
 @media (max-width:760px){ .stamps .hd,.stamps dt{text-align:left} }
+.demo-tag{display:inline-block;vertical-align:middle;margin-left:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--warn);border-radius:999px;padding:3px 10px;position:relative;top:-3px}
+.demo-note{border:1px solid var(--warn);background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px}
+.demo-note b{color:var(--warn)}
 .banner{border:1px solid var(--star);background:var(--star-soft);border-radius:10px;padding:10px 14px;font-size:14px}
 
 /* pipeline */
@@ -220,10 +223,12 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 </head><body>
 <div class="wrap">
   <header class="top">
-    <div><h1>MBA Internship Board</h1>
+    <div><h1>Internship Compiler <span class="demo-tag">Demo</span></h1>
     <p>Summer 2027 MBA internships at tech and corporate employers</p></div>
     <dl class="stamps" id="upd" aria-label="Last updated"></dl>
   </header>
+
+  <div class="demo-note"><b>This is a demo.</b> Every company and role here is made up, so nothing is a real job posting. The real version is used by Booth classmates behind a school login. Stars and pipeline changes you make are saved only in this browser.</div>
 
   <div class="banner" id="banner" hidden></div>
 
