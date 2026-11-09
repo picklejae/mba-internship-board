@@ -451,6 +451,30 @@ header.top p a{color:var(--brand)}
 .stamps dd{color:var(--brand)}
 @media(max-width:760px){header.top{padding:4px 0 15px}}
 
+
+/* Job details: short, scannable sections with full posting on demand */
+.detail{align-items:start}
+.facts{margin-bottom:2px}
+.fact .fv{line-height:1.4}
+.jdsum-wrap{min-width:0}
+.jdsum{display:flex;flex-direction:column;gap:10px;background:transparent;border:0;border-radius:0;padding:0}
+.jdsec,.jdsum .jdsec + .jdsec{
+  margin:0;padding:14px 16px;background:var(--surface);border:1px solid var(--line);
+  border-radius:10px
+}
+.jdsum .jdsec h4{
+  margin:0 0 9px;font-size:12px;font-weight:800;letter-spacing:.08em;
+  color:var(--brand);text-transform:uppercase
+}
+.jdsum ul{margin:0;padding-left:19px;gap:8px;line-height:1.55}
+.jdsum li{padding-left:2px}
+.jdsum li::marker{color:var(--brand)}
+.jdsum .none{padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.jdmore{padding:6px 0 0;color:var(--brand);font-weight:700}
+.fulltog{margin-top:10px;color:var(--brand);font-weight:700}
+.jdtext{max-height:520px;line-height:1.65}
+@media(max-width:760px){.detail{grid-template-columns:1fr}.facts{margin-bottom:0}}
+
 </style>
 </head><body>
 <div class="wrap">
