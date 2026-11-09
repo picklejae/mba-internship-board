@@ -434,6 +434,23 @@ footer li+li{margin-top:5px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 
 
+
+/* Header refinement: quiet, editorial masthead */
+body::before{display:none}
+header.top{
+  min-height:0;padding:8px 0 18px;border:0;border-bottom:1px solid var(--line-strong);
+  border-radius:0;background:transparent;box-shadow:none;color:var(--ink);overflow:visible
+}
+header.top::after{display:none}
+header.top > div::before{color:var(--brand);margin-bottom:6px}
+header.top h1{color:var(--ink)}
+header.top p{color:var(--muted)}
+header.top p a{color:var(--brand)}
+.stamps .hd{color:var(--faint)}
+.stamps dt{color:var(--muted)}
+.stamps dd{color:var(--brand)}
+@media(max-width:760px){header.top{padding:4px 0 15px}}
+
 </style>
 </head><body>
 <div class="wrap">
