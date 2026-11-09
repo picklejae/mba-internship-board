@@ -2,7 +2,7 @@
 <title>Internship Compiler (Demo)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap">
 <style>
 :root{
   color-scheme:light;
@@ -219,6 +219,136 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
   .ms{flex:1 1 100%}
 }
 @media (prefers-reduced-motion:reduce){ .icard.gone{transition:none} }
+/* Internship compiler visual refresh */
+:root{
+  color-scheme:light;
+  --paper:#F3F6FA; --sand:#E9EEF5; --surface:#FFFFFF; --ink:#14243B; --muted:#596B83; --faint:#8291A5;
+  --line:#DFE6EF; --line-strong:#C8D3E1; --hi:#EDF1FF;
+  --brand:#355CFF; --brand-deep:#2344CF; --brand-soft:#EDF1FF; --signal:#D8F36A;
+  --star:var(--brand); --star-soft:var(--brand-soft);
+  --warn:#B64C43; --warn-soft:#FCEDEA; --ok:#18745F; --ok-soft:#E4F4EE;
+  --serif:"Space Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+html{background:var(--paper)}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);letter-spacing:-.008em}
+body::before{content:"";position:fixed;z-index:50;inset:0 0 auto;height:4px;background:var(--signal);pointer-events:none}
+.wrap{max-width:1160px;gap:16px}
+header.top{
+  position:relative;isolation:isolate;overflow:hidden;align-items:center;min-height:142px;
+  padding:26px 30px;border:0;border-radius:18px;
+  background:linear-gradient(115deg,#13243B 0%,#1C3556 72%,#2344CF 140%);
+  box-shadow:0 12px 30px rgba(19,36,59,.12);color:#fff
+}
+header.top::after{
+  content:"";position:absolute;z-index:-1;right:-48px;top:-120px;width:340px;height:340px;
+  border:1px solid rgba(255,255,255,.13);border-radius:50%;
+  box-shadow:0 0 0 28px rgba(255,255,255,.035),0 0 0 58px rgba(255,255,255,.025)
+}
+header.top > div,header.top .stamps{position:relative;z-index:1}
+header.top > div::before{
+  content:"CAREER BOARD  /  2027";display:block;margin-bottom:9px;
+  color:var(--signal);font-size:10px;line-height:1.2;font-weight:800;letter-spacing:.16em
+}
+header.top h1{font-family:var(--serif);font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.045em;color:#fff}
+header.top p{margin-top:8px;color:#C4D0E0;font-size:14px}
+header.top p a{color:var(--signal);font-weight:700;text-decoration-thickness:1px;text-underline-offset:3px}
+.stamps{grid-template-columns:auto auto;gap:3px 12px;font-size:12px}
+.stamps .hd{color:#AFC0D5;letter-spacing:.13em}
+.stamps dt{color:#C4D0E0}
+.stamps dd{color:var(--signal)}
+.banner{border:1px solid #E6CF86;background:#FFF8DF;border-radius:10px;color:#5C4A1B}
+.pipe{background:#fff;border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:14px;box-shadow:0 4px 14px rgba(20,36,59,.045)}
+.pipe-head{padding:16px 18px}
+.pipe-head:hover{background:#F7F9FC}
+.pipe h2{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-.025em}
+.pipe-sum{color:var(--muted)!important;font-weight:500}
+.chev{background:var(--brand);border-radius:8px;padding:6px 11px;font-size:12px;letter-spacing:.01em}
+.pipe-head:hover .chev{background:var(--brand-deep)}
+.pipe-body{padding:0 18px 18px}
+.step{border-color:var(--line);border-radius:10px;padding:12px 14px;transition:border-color .15s,background .15s,transform .15s}
+.step:hover{border-color:var(--brand);transform:translateY(-1px)}
+.step .n{font-family:var(--serif);font-weight:700;color:var(--ink)}
+.step .l{color:var(--muted)}
+.step[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.step[aria-pressed="true"] .n,.step[aria-pressed="true"] .l{color:#fff}
+.steps li:nth-last-child(n+3)::after{background:var(--line-strong)}
+.pcards{border-color:var(--line);border-radius:10px}
+.groupdiv,.groupdiv.newg,.groupdiv.restg{background:#F4F7FB;color:var(--muted);border-color:var(--line)}
+.groupdiv.newg{background:var(--brand-soft);color:var(--brand-deep)}
+.track{gap:7px;margin-top:0}
+.track button{border-color:var(--line-strong);border-radius:9px;padding:9px 15px;background:#fff;color:var(--muted);font-size:14px;transition:background .15s,border-color .15s,color .15s}
+.track button:hover{border-color:var(--brand);color:var(--brand)}
+.track button[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.track .newc{background:var(--signal);color:#17243A}
+.track button[aria-selected="true"] .newc{background:#fff;color:var(--brand-deep)}
+.tabnote{color:var(--muted)}
+.filters{gap:9px}
+.search input,select,.tog,.ms-btn,.pill,.exp-btn,.copy-btn,.rej,.next,.links .apply-btn,.ievs .ev .evact button{
+  border-radius:8px
+}
+.search input,select,.tog,.ms-btn{border-color:var(--line-strong);background:#fff}
+.search input:focus,select:focus,.ms-btn:focus{border-color:var(--brand)}
+select.active,.tog.active,.ms-btn.active{border-color:var(--brand);background:var(--brand-soft)}
+.tog input{accent-color:var(--brand)}
+.ms-pop{border-color:var(--line);border-radius:12px;box-shadow:0 14px 32px rgba(20,36,59,.15)}
+.ms-item:hover{background:#F3F6FA}
+.countline{color:var(--muted)}
+.all-btn{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-deep);border-radius:8px}
+.all-btn:hover{background:#D8F36A;color:#17243A}
+.all-btn[aria-pressed="true"]{background:#fff;color:var(--ink);border-color:var(--line-strong)}
+.pill,.exp-btn,.copy-btn,.rej{border-color:var(--line-strong);background:#fff;color:var(--ink)}
+.next{background:var(--brand);border-color:var(--brand);border-radius:8px}
+.next:hover{background:var(--brand-deep)}
+.list{border-color:var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(20,36,59,.035)}
+.row{padding-top:13px;padding-bottom:13px;border-color:var(--line)}
+@media (prefers-reduced-motion:no-preference){.row:hover{background:#F6F8FC}}
+.star:hover:not(:disabled){background:var(--brand-soft);color:var(--brand)}
+.star[aria-pressed="true"],.star.locked{color:var(--brand)}
+.row.st-applied,.row.st-interviewing,.row.st-offer{background:#EAF6F1}
+.row.st-interviewing{background:#E5F3F4}
+.row.st-offer{background:#DDF0E8}
+.row.st-applied:hover,.row.st-interviewing:hover,.row.st-offer:hover{background:#DDEFE8}
+.row.st-applied .tag.stage,.row.st-interviewing .tag.stage,.row.st-offer .tag.stage{background:var(--ok);color:#fff}
+.tag.new{background:var(--signal);color:#17243A}
+.tag.plain{background:#EEF2F7;color:#53657D}
+.links a{border-color:#B8C6D7}
+.links .apply-btn{border-color:#A9D1C2;color:var(--ok)}
+.detail{background:#F4F7FB;border-color:var(--line-strong)}
+.facts,.jdsum,.jdtext,.evbox,.ievs{border-color:var(--line);border-radius:11px}
+.fact .fl{color:#71829A;letter-spacing:.09em}
+.fact.bad .fv{color:var(--warn)}.fact.good .fv{color:var(--ok)}
+.jdsum .jdsec + .jdsec{border-color:var(--line)}
+.ev .evkind{background:#EEF2F7;color:#40536C}
+.ev .evkind.mg{background:var(--brand-soft);color:var(--brand-deep)}
+.ievs .ievh{background:var(--brand-soft);border-color:var(--line);color:var(--brand-deep)}
+.ievs .ev .evact button:hover{border-color:var(--brand);color:var(--brand)}
+.ibar{border-radius:12px}
+.toast{border-radius:10px;box-shadow:0 10px 30px rgba(20,36,59,.18)}
+.savebar{border-radius:10px}
+footer{color:var(--muted)}
+footer ul{padding:16px 20px 16px 38px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.72)}
+footer li+li{margin-top:5px}
+.si-card{border-color:var(--line);border-radius:16px;box-shadow:0 16px 40px rgba(20,36,59,.1)}
+.si-card h1{font-family:var(--serif);letter-spacing:-.035em}
+.si-row input,.si-row button,#si-code{border-radius:8px}
+.si-row button{background:var(--brand);border-color:var(--brand)}
+.si-row button:hover:not(:disabled){background:var(--brand-deep)}
+@media(max-width:760px){
+  body{padding:14px 12px 40px}
+  .wrap{gap:12px}
+  header.top{min-height:0;padding:21px 19px;border-radius:14px;align-items:flex-start}
+  header.top::after{right:-180px;top:-190px}
+  header.top .stamps{width:100%;grid-template-columns:auto auto;justify-content:start}
+  .stamps .hd{grid-column:1/-1;text-align:left}
+  .stamps dt{text-align:left}
+  .pipe-head{padding:14px}
+  .pipe-body{padding:0 14px 14px}
+  .track button{padding:8px 11px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+
 </style>
 </head><body>
 <div class="wrap">
