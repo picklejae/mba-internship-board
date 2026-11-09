@@ -870,12 +870,11 @@ header.top p a{color:var(--brand)}
 
     function extractPayLine(text){
     for (const line of (text || "").split(/\r?\n/)){
-      if (/\$\s?\d/.test(line) && /(hour|hr\\b|year|annual|salary|pay|range|compensation|stipend|week|month|rate)/i.test(line))
-        return line.replace(/^[•\\-*·\\s]+/,"").trim().slice(0,180);
+      if (/[$][ ]?[0-9]/.test(line) && /(hour|hr|year|annual|salary|pay|range|compensation|stipend|week|month|rate)/i.test(line))
+        return line.replace(/^[•*· -]+/,"").trim().slice(0,180);
     }
     return null;
   }
-
 // ---------- job description sections (parsed in the page; no AI)
   function parseJD(text){
     const R_PREF = /\b(preferred|nice[- ]to[- ]haves?|bonus points|desired|desirable|pluses|a plus|additional qualifications|ideal(ly)? (candidate|you)|extra credit|it would be great|ways to stand out|stand out|set yourself apart|what sets you apart)\b/i;
