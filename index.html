@@ -369,7 +369,7 @@ header.top p a{color:var(--brand)}
 
 /* Job details: short, scannable sections with full posting on demand */
 .detail{align-items:start}
-.facts{margin-bottom:2px}
+.facts{margin-bottom:2px}.facts.summer-snapshot{grid-template-columns:repeat(4,minmax(0,1fr))}
 .fact .fv{line-height:1.4}
 .jdsum-wrap{min-width:0}
 .jdsum{display:flex;flex-direction:column;gap:10px;background:transparent;border:0;border-radius:0;padding:0}
@@ -388,7 +388,7 @@ header.top p a{color:var(--brand)}
 .jdmore{padding:6px 0 0;color:var(--brand);font-weight:700}
 .fulltog{margin-top:10px;color:var(--brand);font-weight:700}
 .jdtext{max-height:520px;line-height:1.65}
-@media(max-width:760px){.detail{grid-template-columns:1fr}.facts{margin-bottom:0}}
+@media(max-width:760px){.detail{grid-template-columns:1fr}.facts{margin-bottom:0}.facts.summer-snapshot{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 </style>
 </head><body>
@@ -994,7 +994,7 @@ header.top p a{color:var(--brand)}
   function jdSummary(r, text){
     const box = el("div","jdsum"), secs = parseJD(text);
     const SHOW = 5; let found = 0;
-    [["resp","What you'll do"],["qual","Requirements"],["pref","Nice to have"]].forEach(([k,label]) => {
+    [["resp","What you'll do"],["qual","What they’re looking for"],["pref","Nice to have"]].forEach(([k,label]) => {
       const items = tidyItems(secs[k]); if (!items.length) return; found += items.length;
       const d = el("div","jdsec"); d.appendChild(el("h4",null,label)); const ul = el("ul");
       items.forEach((t, i) => { const li = jdItem(t); if (i >= SHOW) li.hidden = true; ul.appendChild(li); });
@@ -1027,7 +1027,7 @@ header.top p a{color:var(--brand)}
     let box = detailEls.get(ck);
     if (!box){
       box = el("div","detail");
-      const facts = el("div","facts");
+      const facts = el("div","facts summer-snapshot");
       const fact = (label, value, cls) => {
         const c = el("div","fact" + (cls ? " " + cls : ""));
         c.appendChild(el("div","fl",label)); c.appendChild(value); facts.appendChild(c); return c;
