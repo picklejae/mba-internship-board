@@ -366,6 +366,30 @@ header.top p a{color:var(--brand)}
 .stamps dd{color:var(--brand)}
 @media(max-width:760px){header.top{padding:4px 0 15px}}
 
+
+/* Job details: short, scannable sections with full posting on demand */
+.detail{align-items:start}
+.facts{margin-bottom:2px}
+.fact .fv{line-height:1.4}
+.jdsum-wrap{min-width:0}
+.jdsum{display:flex;flex-direction:column;gap:10px;background:transparent;border:0;border-radius:0;padding:0}
+.jdsec,.jdsum .jdsec + .jdsec{
+  margin:0;padding:14px 16px;background:var(--surface);border:1px solid var(--line);
+  border-radius:10px
+}
+.jdsum .jdsec h4{
+  margin:0 0 9px;font-size:12px;font-weight:800;letter-spacing:.08em;
+  color:var(--brand);text-transform:uppercase
+}
+.jdsum ul{margin:0;padding-left:19px;gap:8px;line-height:1.55}
+.jdsum li{padding-left:2px}
+.jdsum li::marker{color:var(--brand)}
+.jdsum .none{padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.jdmore{padding:6px 0 0;color:var(--brand);font-weight:700}
+.fulltog{margin-top:10px;color:var(--brand);font-weight:700}
+.jdtext{max-height:520px;line-height:1.65}
+@media(max-width:760px){.detail{grid-template-columns:1fr}.facts{margin-bottom:0}}
+
 </style>
 </head><body>
 <div class="wrap">
@@ -844,6 +868,147 @@ header.top p a{color:var(--brand)}
     list.appendChild(frag);
   }
 
+    function extractPayLine(text){
+    for (const line of (text || "").split(/\r?\n/)){
+      if (/\$\s?\d/.test(line) && /(hour|hr\\b|year|annual|salary|pay|range|compensation|stipend|week|month|rate)/i.test(line))
+        return line.replace(/^[•\\-*·\\s]+/,"").trim().slice(0,180);
+    }
+    return null;
+  }
+
+// ---------- job description sections (parsed in the page; no AI)
+  function parseJD(text){
+    const R_PREF = /\b(preferred|nice[- ]to[- ]haves?|bonus points|desired|desirable|pluses|a plus|additional qualifications|ideal(ly)? (candidate|you)|extra credit|it would be great|ways to stand out|stand out|set yourself apart|what sets you apart)\b/i;
+    const R_QUAL = /\b(qualifications?|requirements?|required|what you('|’)?ll need|what you need|what we('|’)?re looking for|what we look for|who you are|you have|you bring|what you bring|must[- ]haves?|minimum|basic|skills|eligibility|about you|your background|experience|you are|you should have|to be successful|you('|’)?re a fit|what we need to see|profile|who you('|’)?ll be|what it takes|candidate requirements|hear from you if|great fit|you('|’)?ll bring|what you('|’)?ll need to succeed|ideal profile)\b/i;
+    const R_RESP = /\b(responsibilit\w*|duties|accountabilit\w*|what you('|’)?ll do|what you will do|what you('|’)?ll be doing|what you will be doing|in this role|day[- ]to[- ]day|your impact|what you('|’)?ll work on|key activities|the role|role overview|position summary|job summary|internship (overview|description|details)|projects?|the work|your role|what you('|’)?ll learn|the opportunity|you will|your time here|job description|expected (job )?duties|key projects|what the job involves)\b/i;
+    const R_OTHER = /\b(about (us|the company|the team)|who we are|benefits|compensation|pay range|salary|base pay|equal (employment )?opportunit\w*|eeo|why (join|work)|perks|our (team|company|culture|values|mission)|how to apply|additional information|disclaimer|accommodations?|work authorization|location|program dates|timeline|recruiting process|application process|deadline|company overview|diversity|privacy|legal|what you can expect|why you('|’)?ll love|what we offer)\b/i;
+    const R_JUNK = /(\$\s?\d|pay is determined|equal (employment )?opportunit|\beeo\b|is proud to be|accommodation|this posting|disclaimer|salary range|pay range|base salary|benefits include|we offer|click apply|apply now|e-verify)/i;
+    const lines = (text||"").replace(/\r/g,"").split("\n").map(s => s.replace(/ /g," ").trim());
+    const secs = { resp: [], qual: [], pref: [] }; let cur = null;
+    const ne = lines.filter(Boolean), wrapped = ne.length > 8 && ne.filter(l => l.length >= 70 && l.length <= 115 && !/[.!?:;]$/.test(l)).length / ne.length > 0.3;
+    const classify = h => { const x = h.replace(/[:\-–—]+$/,"").trim(); if (x.length < 3) return null;
+      if (R_PREF.test(x)) return "pref"; if (R_RESP.test(x) && !R_QUAL.test(x)) return "resp"; if (R_QUAL.test(x)) return "qual"; if (R_RESP.test(x)) return "resp"; if (R_OTHER.test(x)) return "other"; return null; };
+    const isBullet = s => /^[•\-\*·▪◦●○–]\s*/.test(s) || /^\d{1,2}[\.\)]\s+/.test(s);
+    const clean = s => s.replace(/^[•\-\*·▪◦●○–]\s*/,"").replace(/^\d{1,2}[\.\)]\s+/,"").trim();
+    for (const raw of lines){
+      if (!raw) continue;
+      const bullet = isBullet(raw), s = clean(raw);
+      const hs = s.replace(/^[^\p{L}\p{N}]+/u, "").replace(/\s*(\.{2,}|…)\s*$/, "").trim();
+      let head = null, rest = "";
+      if (!bullet){
+        const m = hs.match(/^([^:.!?]{3,70}):\s*(.*)$/);
+        if (m && classify(m[1])) { head = classify(m[1]); rest = m[2]; }
+        else if (hs.length <= 70 && !/[.;,]$/.test(hs) && classify(hs)) {
+          // short heading-like line (title case or all caps or few words)
+          const words = hs.split(/\s+/).length;
+          if (words <= 9) head = classify(hs);
+        }
+      }
+      if (head){ cur = head === "other" ? null : head; if (cur && rest) secs[cur].push(rest); continue; }
+      if (cur) {
+        if (R_JUNK.test(s)) { if (/equal opportunit|eeo|benefits|is proud to be|pay is determined|salary range|pay range/i.test(s)) cur = null; continue; }
+        if (s.length <= 1) continue;
+        const arr = secs[cur], last = arr[arr.length - 1];
+        if (!bullet && s.length > 280 && arr.length) { cur = null; continue; }
+        if (!bullet && last && !/[.!?:;)]$/.test(last) && (/^[a-z(]/.test(s) || (wrapped && last.length >= 60))) arr[arr.length - 1] = last + " " + s;
+        else arr.push(s);
+      }
+    }
+    if (!secs.resp.length && !secs.qual.length){
+      const NEED = /\b(pursuing|enrolled|degree|MBA|master|bachelor|years?\b.*experience|experience (in|with)|proficien|skills?\b|ability to|able to|strong|excellent|knowledge of|familiar|understanding of|track record|comfort(able)? with)\b/i;
+      const bl = lines.filter(l => l && isBullet(l)).map(clean).filter(x => x.length > 3 && !R_JUNK.test(x));
+      if (bl.length >= 3) bl.forEach(x => secs[NEED.test(x) ? "qual" : "resp"].push(x));
+    }
+    for (const k of Object.keys(secs)) secs[k] = secs[k].filter((v,i,a) => a.indexOf(v) === i).slice(0, 14);
+    return secs;
+  }
+  // Length, hours and where you work, e.g. "10–12 weeks · 15–20 hrs/wk · Hybrid".
+  function findSchedule(r, text){
+    const t = (text || "").replace(/\s+/g, " "), out = [];
+    const w = t.match(/\b(\d{1,2})\s*(?:(?:–|-|—|to)\s*(\d{1,2})\s*)?-?\s*weeks?\b/i);
+    if (w && +w[1] >= 4 && +w[1] <= 30) out.push(w[2] ? `${w[1]}–${w[2]} weeks` : `${w[1]} weeks`);
+    const mo = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?";
+    const RX = new RegExp(`\\b${mo}(?:\\s+\\d{1,2}(?!\\d))?,?(?:\\s+20\\d\\d)?\\s*(?:–|-|—|to|through)\\s*${mo}(?:\\s+\\d{1,2}(?!\\d))?,?(?:\\s+20\\d\\d)?`, "gi");
+    for (const m of t.matchAll(RX)){
+      if (/(graduat|class of|degree|enrolled|appl(y|ication)|recruit|deadline)/i.test(t.slice(Math.max(0, m.index - 60), m.index))) continue;
+      out.push(m[0].replace(/\s*(–|-|—|to|through)\s*/, "–").replace(/[,.\s]+$/, "")); break;
+    }
+    const h = r.hours || ((t.match(/\b(\d{1,2})\s*(?:(?:–|-|—|to)\s*(\d{1,2})\s*)?(?:hours|hrs)\s*(?:per|a|\/)\s*week\b/i) || [])[0] || "").replace(/\s*(hours|hrs)\s*(per|a|\/)\s*week/i, " hrs/wk");
+    if (h) out.push(h);
+    if (!r.workMode){
+      if (/\bhybrid\b/i.test(t)) out.push("Hybrid");
+      else if (/\b(fully remote|remote[- ]first|100% remote|work remotely)\b/i.test(t)) out.push("Remote");
+      else if (/\b(on[- ]?site|in[- ]office|in person)\b/i.test(t)) out.push("On-site");
+    }
+    return out.slice(0, 3).join(" · ") || null;
+  }
+  function findPay(text){
+    const R_JUNK = /(\$\s?\d|pay is determined|equal (employment )?opportunit|\beeo\b|is proud to be|accommodation|this posting|disclaimer|salary range|pay range|base salary|benefits include|we offer|click apply|apply now|e-verify)/i;
+    const lines = (text||"").split("\n");
+    for (const l of lines){ if (/\$\s?\d/.test(l) && /(hour|hr\b|year|annual|salary|pay|range|compensation|stipend|week|month|rate)/i.test(l)) return l.replace(/^[•\-\*·\s]+/,"").trim().slice(0,180); }
+    return null;
+  }
+  // Pay as just the range, e.g. "$38–$94/hr", from a pay field or a sentence in the posting.
+  function compactPay(t){
+    if (!t) return null;
+    const x = String(t).replace(/\s+/g," ");
+    const unitOf = u => !u ? "" : /h(ou)?r/i.test(u) ? "/hr" : /y(ea)?r|annual/i.test(u) ? "/yr" : /week|wk/i.test(u) ? "/wk" : /month|mo\b/i.test(u) ? "/mo" : "";
+    const RX = /\$\s?([\d,.]+)\s*([kK])?(?:\s*(?:–|-|—|to)\s*\$?\s?([\d,.]+)\s*([kK])?)?(?:\s*(?:USD)?\s*(?:\/|per|an|a)\s*(hour|hr|year|yr|annum|week|wk|month))?/gi;
+    const num = (v, k) => parseFloat(String(v).replace(/,/g,"")) * (k ? 1000 : 1);
+    let m;
+    while ((m = RX.exec(x))){
+      const after = x.slice(m.index + m[0].length, m.index + m[0].length + 12);
+      if (/^\s*(billion|million|bn\b|mm\b|[bm]\b)/i.test(after)) continue;
+      const lo = num(m[1], m[2]), hi = m[3] ? num(m[3], m[4]) : null;
+      if (!(lo >= 7)) continue;
+      const fmt = (v, raw, k) => "$" + String(raw).replace(/[.,]+$/,"") + (k ? "K" : "");
+      let core = fmt(lo, m[1], m[2]) + (hi && hi !== lo ? "–" + fmt(hi, m[3], m[4]) : "");
+      const u = m[5] || (x.match(/\b(per|an|a|\/)\s*(hour|hr|year|annum|week|month)\b|\b(hourly|annual(ly)?|yearly)\b/i) || [])[0];
+      return core + unitOf(u);
+    }
+    m = x.match(/([\d,.]+)\s*USD\s*(?:–|-|to)\s*([\d,.]+)\s*USD/i);
+    if (m) { const u = (x.match(/\b(hour|hourly|year|annual|week|month)/i) || [])[0]; return "$" + m[1] + "–$" + m[2] + unitOf(u); }
+    return x.length <= 40 ? x : null;
+  }
+  // Tidy the parsed lines: drop facts shown in the strip above (pay, visa, dates),
+  // split run-on paragraphs into sentences, and drop company boilerplate glued on.
+  function tidyItems(items){
+    const FACT = /(\$\s?\d|\bUSD\b|hourly rate|salary|compensation|pay range|visa|sponsorship|work authori[sz]ation|authori[sz]ed to work|applications? (for this job )?(will be|are) accepted|application deadline|equal (employment )?opportunit|\beeo\b)/i;
+    const PUFF = /\b(we|our|us)\b.*\b(want|hear|proud|believe|committed|offer|looking forward)\b|is widely considered|we want to hear from you|if you('|’)re (creative|passionate|excited)/i;
+    const out = [];
+    for (let t of items){
+      t = t.replace(/\s+/g," ").trim();
+      // a sentence glued on without a period, e.g. "...AI and agents NVIDIA is widely considered..."
+      t = t.replace(/([a-z])\s+(?=(?:[A-Z][\w&.-]*\s){0,2}(?:is|are) (?:widely|one of|a leader|the world))/g, "$1.§");
+      let parts = t.split("§");
+      if (t.length > 260) parts = parts.flatMap(x => x.split(/(?<=[a-z0-9)”"'][.!?])\s+(?=[A-Z(“"])/));
+      parts = parts.map(x => x.trim()).filter(Boolean);
+      parts.forEach((x, i) => { if (FACT.test(x)) return; if (i > 0 && PUFF.test(x)) return; if (x.length < 3) return; out.push(x); });
+    }
+    return out.filter((v,i,a) => a.indexOf(v) === i);
+  }
+  function jdItem(t){
+    const li = el("li"); const m = t.match(/^([A-Z][^:]{2,45}):\s+(.+)$/);
+    if (m) { li.appendChild(el("b",null, m[1] + ": ")); li.appendChild(document.createTextNode(m[2])); } else li.textContent = t;
+    return li;
+  }
+  function jdSummary(r, text){
+    const box = el("div","jdsum"), secs = parseJD(text);
+    const SHOW = 5; let found = 0;
+    [["resp","What you'll do"],["qual","Requirements"],["pref","Nice to have"]].forEach(([k,label]) => {
+      const items = tidyItems(secs[k]); if (!items.length) return; found += items.length;
+      const d = el("div","jdsec"); d.appendChild(el("h4",null,label)); const ul = el("ul");
+      items.forEach((t, i) => { const li = jdItem(t); if (i >= SHOW) li.hidden = true; ul.appendChild(li); });
+      d.appendChild(ul);
+      if (items.length > SHOW){ const more = el("button","jdmore", `Show ${items.length - SHOW} more`); more.type = "button";
+        more.addEventListener("click", () => { const open = more.dataset.open === "1"; [...ul.children].forEach((li, i) => { if (i >= SHOW) li.hidden = open; });
+          more.dataset.open = open ? "" : "1"; more.textContent = open ? `Show ${items.length - SHOW} more` : "Show fewer"; });
+        d.appendChild(more); }
+      box.appendChild(d); });
+    if (!found) box.appendChild(el("div","none","This posting doesn't use standard sections, so the full text is shown below."));
+    box._found = found; return box;
+  }
+
   // ---------- details: job description, notes, history
   const jdCache = new Map(), prepCache = new Map(), detailEls = new Map(), prepTimers = new Map();
   let dbRef = null;
@@ -863,50 +1028,90 @@ header.top p a{color:var(--brand)}
     let box = detailEls.get(ck);
     if (!box){
       box = el("div","detail");
-      const left = el("div"); const lh = el("div","dh"); lh.appendChild(el("h3",null,"Job description")); const src = el("span","dsrc"); lh.appendChild(src);
-      const cp = el("button","copy-btn","Copy"); cp.type = "button"; cp.title = "Copy the job description"; lh.appendChild(cp); left.appendChild(lh);
-      if (where === "p"){ const dl = linkSet(r); dl.className = "links dlinks"; left.appendChild(dl); }
-      const pay = el("div","pay"); pay.hidden = true; left.appendChild(pay);
-      const vv = visaOf(r);
-      if (coVisaNo(r) && !(vv && (vv.status === "no" || vv.status === "yes"))){ const vl = el("div","visa-line"); vl.appendChild(el("b",null,"Visa: won't sponsor. ")); vl.appendChild(el("span",null,"Known company policy; the posting itself doesn't say.")); left.appendChild(vl); }
-      else if (vv && vv.status && vv.status !== "unstated"){ const vl = el("div","visa-line");
-        vl.appendChild(el("b",null, vv.status === "no" ? "Visa: won't sponsor. " : vv.status === "limited" ? "Visa: OK on CPT/OPT for the internship; no long-term sponsorship mentioned. " : "Visa: sponsors. "));
-        if (vv.quote) vl.appendChild(el("span",null, "“…" + vv.quote + "…”"));
-        left.appendChild(vl); }
-      const jd = el("div","jdtext","Loading…"); left.appendChild(jd);
-      const paste = document.createElement("textarea"); paste.className = "prep-in"; paste.rows = 8; paste.hidden = true;
-      paste.placeholder = "No saved description for this posting yet. Paste it here to keep it for interview prep (private to you).";
+      const facts = el("div","facts");
+      const fact = (label, value, cls) => {
+        const c = el("div","fact" + (cls ? " " + cls : ""));
+        c.appendChild(el("div","fl",label)); c.appendChild(value); facts.appendChild(c); return c;
+      };
+      const deadline = el("div","fv");
+      if (r.deadline){ deadline.textContent = fmtDue(r); deadline.appendChild(el("span","fs","application deadline")); }
+      else { deadline.textContent = "Not listed"; }
+      fact("Deadline",deadline);
+      fact("Location",el("div","fv",[r.location,r.workMode].filter(Boolean).join(" · ") || "Not listed"));
+      const payv = el("div","fv","Loading…"); fact("Pay",payv);
+      const vv = visaOf(r), visav = el("div","fv"); let vcls="";
+      if (coVisaNo(r) && !(vv && (vv.status === "no" || vv.status === "yes"))){ visav.textContent="Won't sponsor"; vcls="bad"; }
+      else if (vv && vv.status === "no"){ visav.textContent="Won't sponsor"; vcls="bad"; }
+      else if (vv && vv.status === "limited"){ visav.textContent="CPT/OPT only"; }
+      else if (vv && vv.status === "yes"){ visav.textContent="Sponsors"; vcls="good"; }
+      else { visav.textContent="Not stated"; }
+      fact("Visa",visav,vcls);
+      const fl = linkSet(r); fl.className="flinks";
+      const cp = el("button","copy-btn","Copy description"); cp.type="button"; cp.title="Copy the full job description"; fl.appendChild(cp);
+      facts.appendChild(fl);
+
+      const left=el("div");
+      const lh=el("div","jdhead"); lh.appendChild(el("h3",null,"Role snapshot"));
+      const src=el("span","dsrc"); lh.appendChild(src); left.appendChild(lh);
+      const sumWrap=el("div","jdsum-wrap"); left.appendChild(sumWrap);
+      const ftog=el("button","fulltog","Show full posting ▾"); ftog.type="button"; ftog.hidden=true; left.appendChild(ftog);
+      const jd=el("div","jdtext","Loading…"); jd.hidden=true; left.appendChild(jd);
+      const showSummary=(text)=>{
+        sumWrap.textContent="";
+        const sm=jdSummary(r,text); sumWrap.appendChild(sm);
+        if(sm._found){ jd.hidden=true; ftog.hidden=false; ftog.textContent="Show full posting ▾"; }
+        else { jd.hidden=false; ftog.hidden=true; }
+      };
+      ftog.addEventListener("click",()=>{ jd.hidden=!jd.hidden; ftog.textContent=jd.hidden?"Show full posting ▾":"Hide full posting ▴"; });
+      const paste=document.createElement("textarea"); paste.className="prep-in"; paste.rows=8; paste.hidden=true;
+      paste.placeholder="No saved description for this posting yet. Paste it here to keep it for interview prep (private to you).";
       paste.setAttribute("aria-label","Paste the job description"); left.appendChild(paste);
-      const right = el("div","prepcol");
-      right.appendChild(el("h3",null,"My application"));
-      const hist = el("ol","hist"); right.appendChild(hist);
-      const nl = el("label","nlbl","Interview prep notes (private)"); nl.htmlFor = "pn-" + where + k; right.appendChild(nl);
-      const notes = document.createElement("textarea"); notes.className = "prep-in"; notes.id = "pn-" + where + k; notes.rows = 6;
-      notes.placeholder = "Why this role, stories to tell, people you talked to, interview rounds…"; right.appendChild(notes);
-      box.append(left, right);
-      box._refs = { hist };
-      const blurCheck = () => setTimeout(() => { if (state.pending && !busyTyping()) render(); }, 0);
-      [paste, notes].forEach(t => t.addEventListener("blur", blurCheck));
-      if (!state.canTrack){ paste.disabled = notes.disabled = true; notes.placeholder = "Sign in on claude.ai to keep private notes."; }
-      notes.addEventListener("input", () => { const v = prepCache.get(k); if (v){ v.notes = notes.value; savePrep(k); } });
-      paste.addEventListener("input", () => { const v = prepCache.get(k); if (v){ v.jd = paste.value; savePrep(k); } });
-      cp.addEventListener("click", async () => { const t = !jd.hidden ? jd.textContent : paste.value; if (!t || t === "Loading…"){ toast("No description to copy yet"); return; }
-        const head = `${coName(r)} — ${r.title}\n${r.location || ""}\n\n`; const ok = await copyText(head + t); cp.textContent = ok ? "Copied ✓" : "Copy failed"; setTimeout(() => { cp.textContent = "Copy"; }, 1800); });
-      Promise.all([loadJD(k), loadPrep(k)]).then(([shared, mine]) => {
-        notes.value = mine.notes || "";
-        if (shared && shared.text){ jd.textContent = shared.text; src.textContent = "Saved from " + (shared.source || "the posting") + (shared.capturedAt ? " on " + fmtHistDay(shared.capturedAt) : "");
-          if (shared.pay){ pay.hidden = false; pay.textContent = "Pay: " + shared.pay; } }
-        else if (mine.jd){ jd.hidden = true; paste.hidden = false; paste.value = mine.jd; src.textContent = "Pasted by you"; }
-        else { jd.hidden = true; paste.hidden = false; src.textContent = r.portalUrl ? "" : "Not saved automatically for this posting"; }
+
+      const right=el("div","prepcol"); right.appendChild(el("h3",null,"My application"));
+      const hist=el("ol","hist"); right.appendChild(hist);
+      const nl=el("label","nlbl","Interview prep notes (private)"); nl.htmlFor="pn-"+where+k; right.appendChild(nl);
+      const notes=document.createElement("textarea"); notes.className="prep-in"; notes.id="pn-"+where+k; notes.rows=6;
+      notes.placeholder="Why this role, stories to tell, people you talked to, interview rounds…"; right.appendChild(notes);
+
+      box.append(facts,left,right); box._refs={hist};
+      const blurCheck=()=>setTimeout(()=>{ if(state.pending&&!busyTyping()) render(); },0);
+      [paste,notes].forEach(t=>t.addEventListener("blur",blurCheck));
+      if(!state.canTrack){ paste.disabled=notes.disabled=true; notes.placeholder="Sign in to keep private notes."; }
+      notes.addEventListener("input",()=>{ const v=prepCache.get(k); if(v){ v.notes=notes.value; savePrep(k); } });
+      paste.addEventListener("input",()=>{ const v=prepCache.get(k); if(v){ v.jd=paste.value; savePrep(k); } });
+      cp.addEventListener("click",async()=>{
+        const t=jd.dataset.fullText || paste.value;
+        if(!t || t==="Loading…"){ toast("No description to copy yet"); return; }
+        const head=coName(r)+" — "+r.title+"\n"+(r.location||"")+"\n\n";
+        const ok=await copyText(head+t); cp.textContent=ok?"Copied ✓":"Copy failed";
+        setTimeout(()=>{cp.textContent="Copy description";},1800);
       });
-      detailEls.set(ck, box);
+      Promise.all([loadJD(k),loadPrep(k)]).then(([shared,mine])=>{
+        notes.value=mine.notes||"";
+        const text=(shared&&shared.text)||mine.jd||"";
+        jd.dataset.fullText=text;
+        payv.textContent=(shared&&shared.pay)||extractPayLine(text)||"Not listed";
+        if(payv.textContent==="Not listed") payv.parentNode.classList.add("muted");
+        if(shared&&shared.text){
+          jd.textContent=shared.text; src.textContent="From "+(shared.source||"the posting")+(shared.capturedAt?" · saved "+fmtHistDay(shared.capturedAt):"");
+          showSummary(shared.text);
+        } else if(mine.jd){
+          jd.textContent=mine.jd; jd.hidden=true; paste.hidden=false; paste.value=mine.jd; src.textContent="Pasted by you";
+          showSummary(mine.jd); ftog.hidden=true;
+        } else {
+          jd.hidden=true; paste.hidden=false;
+          src.textContent=r.portalUrl?"":"Not saved automatically for this posting";
+          sumWrap.appendChild(el("div","jdsum none","No saved description yet. Paste one here to create a quick role summary."));
+        }
+      });
+      detailEls.set(ck,box);
     }
-    const { hist } = box._refs; hist.textContent = "";
-    const m = mineOf(k); const items = m ? (Array.isArray(m.hist) ? m.hist : [{ s: m.s, at: m.at }]) : [];
-    const lbl = s => s === "Interested" ? "★ Favorited" : s === "Not started" ? "Removed" : s;
-    if (!items.length) hist.appendChild(el("li","nohist", "Not in your pipeline yet. Tap ☆ to favorite it."));
-    items.forEach(h => { const li = el("li"); li.appendChild(el("b",null,lbl(h.s))); li.appendChild(document.createTextNode(" · " + fmtHistDay(h.at))); hist.appendChild(li); });
-    if (r.deadline){ const li = el("li","meta-li"); li.textContent = "Posting deadline · " + fmtHistDay(r.deadline); hist.appendChild(li); }
+    const {hist}=box._refs; hist.textContent="";
+    const m=mineOf(k), items=m?(Array.isArray(m.hist)?m.hist:[{s:m.s,at:m.at}]):[];
+    const lbl=s=>s==="Interested"?"★ Favorited":s==="Not started"?"Removed":s;
+    if(!items.length) hist.appendChild(el("li","nohist","Not in your pipeline yet. Tap ☆ to favorite it."));
+    items.forEach(h=>{ const li=el("li"); li.appendChild(el("b",null,lbl(h.s))); li.appendChild(document.createTextNode(" · "+fmtHistDay(h.at))); hist.appendChild(li); });
+    if(r.deadline){ const li=el("li","meta-li"); li.textContent="Posting deadline · "+fmtHistDay(r.deadline); hist.appendChild(li); }
     return box;
   }
 
