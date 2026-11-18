@@ -97,9 +97,24 @@
     a2: { at: iso(now - 12 * 3600000), source: "Career portal + job board refresh",
       added: recent.map(([id, r]) => ({ id, company: r.company, title: r.title, track: r.track })) },
   };
-  const meta = { sync: { portalAt: iso(now - 5 * 3600000), boardAt: iso(now - 5 * 3600000), coRunAt: iso(now - 9 * 3600000), portalStatus: "ok", boardStatus: "ok" } };
+  const meta = { sync: { boothAt: iso(now - 5 * 3600000), boothStatus: "ok", linkedinAt: iso(now - 5 * 3600000), linkedinStatus: "ok", coRunAt: iso(now - 9 * 3600000) } };
 
-  const shared = { companies, roles, visa, jd, changes, meta };
+  // Fictional recruiting events. [id, companyKey, name, kind, format, place, starts in days, Central start hour, hours long]
+  const at = (n, h) => { const d = new Date(now + n * DAY); d.setUTCHours(h + 6, 0, 0, 0); return d.getTime(); };
+  const E = [
+    ["e1", "northwind-analytics", "MBA product internship info session", "Info session", "Virtual", "Zoom", 2, 12, 1],
+    ["e2", "bright-basket", "Brand management coffee chats", "Coffee chats", "In person", "Harper Center", 4, 16, 2],
+    ["e3", "atlas-cloud", "Meet the strategy & operations team", "Networking", "Virtual", "Zoom", 6, 17, 1],
+    ["e4", "cedar-health", "Healthcare leadership case workshop", "Workshop", "In person", "Gleacher Center", 9, 18, 2],
+  ];
+  const events = {};
+  for (const [id, ck, name, kind, format, place, d, h, len] of E) {
+    const c = companies[ck], s = at(d, h);
+    events[id] = { company: c.name, companyKey: ck, track: c.track, name, kind, format, place,
+      startAt: iso(s), endAt: iso(s + len * 3600000), target: "Class of 2027", boothUrl: null, firstSeen: ymd(now - 2 * DAY) };
+  }
+
+  const shared = { companies, roles, visa, jd, events, changes, meta };
   const LS = "demo-board-user-v1";
   const loadUser = () => { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch (e) { return {}; } };
   const saveUser = (u) => { try { localStorage.setItem(LS, JSON.stringify(u)); } catch (e) {} };

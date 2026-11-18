@@ -46,7 +46,7 @@ header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items
 .pipe-head:hover .chev{background:#99691A}
 .pipe-body{display:flex;flex-direction:column;gap:14px;padding:0 18px 14px}
 .pipe-note{font-size:13px;color:var(--muted);margin-top:-6px}
-.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .step{width:100%;position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid #DCC59A;background:var(--surface);border-radius:10px;padding:10px 14px 10px 14px;cursor:pointer}
 .step .n{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
 .step .l{font-size:13px;font-weight:600;color:var(--muted)}
@@ -54,9 +54,15 @@ header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items
 .step[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .step[aria-pressed="true"] .l{color:#E9E2D6}
 .steps li{position:relative}
-.steps li:not(:last-child)::after{content:"";position:absolute;right:-8px;top:50%;width:8px;height:2px;background:var(--line-strong)}
+.steps li:nth-last-child(n+3)::after{content:"";position:absolute;right:-8px;top:50%;width:8px;height:2px;background:var(--line-strong)}
 .pcards{display:flex;flex-direction:column;background:var(--surface);border:1px solid #E6D3AE;border-radius:10px;padding:0 12px}
 .pcards:empty{display:none}
+.pcards{max-height:min(62vh,640px);overflow-y:auto;overscroll-behavior:contain}
+.psearch{display:flex;gap:8px;align-items:center}
+.psearch input{flex:1;min-width:0;font:inherit;font-size:14px;padding:8px 12px;border:1px solid #DCC59A;border-radius:10px;background:#fff;color:var(--ink)}
+.psearch input:focus{outline:2px solid #B7801F;outline-offset:1px}
+.psearch .pclear{border:0;background:none;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;text-decoration:underline}
+.pc .stg{font-size:12px;font-weight:700;color:var(--muted);margin-left:6px}
 .pcards > :last-child{border-bottom:0}
 .pc{display:grid;grid-template-columns:minmax(0,1fr) 130px auto;gap:12px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--line)}
 .pc.closed{opacity:.55}
@@ -81,7 +87,9 @@ header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items
 .next:hover{background:#463D33}
 .x{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);border-radius:999px;width:30px;height:30px;font-size:14px;cursor:pointer;line-height:1}
 .x:hover{border-color:var(--warn);color:var(--warn)}
-.next:disabled,.x:disabled{opacity:.45;cursor:default}
+.rej{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.rej:hover{border-color:var(--warn);color:var(--warn)}
+.next:disabled,.x:disabled,.rej:disabled{opacity:.45;cursor:default}
 .pempty{padding:14px 2px;color:var(--muted);font-size:14px}
 .more{align-self:flex-start;border:0;background:none;padding:10px 2px 0;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;text-decoration:underline}
 
@@ -166,7 +174,7 @@ select.active{border-color:var(--ink);background:var(--hi)}
 
 /* details */
 .detail{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px 20px;padding:14px 16px 18px;border-top:1px dashed var(--line-strong);background:var(--paper)}
-.facts{grid-column:1 / -1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.facts{grid-column:1 / -1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .fact{padding:10px 14px;border-left:1px solid var(--line);min-width:0}
 .fact:first-child{border-left:0}
 .fact .fl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
@@ -181,13 +189,14 @@ select.active{border-color:var(--ink);background:var(--hi)}
 .flinks .copy-btn{margin-left:auto}
 .jdhead{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;margin-bottom:8px}
 .jdhead h3{margin:0}
+.jdhead .jdcopy{margin-left:auto;align-self:center}
 .jdsec{margin-top:4px}
 .jdsec + .jdsec{margin-top:14px}
 .jdsum .jdsec h4{margin:0 0 6px;font-size:14px;font-weight:700;color:var(--ink);text-transform:none;letter-spacing:0}
 .jdsum .jdsec + .jdsec{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .jdsec li b{font-weight:700}
 .jdmore{border:0;background:none;padding:4px 0 0 18px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;text-decoration:underline}
-@media (max-width:760px){ .facts{grid-template-columns:repeat(2,minmax(0,1fr))} .fact:nth-child(3){border-left:0} .fact:nth-child(n+3){border-top:1px solid var(--line)} .flinks .copy-btn{margin-left:0} }
+@media (max-width:760px){ .facts{grid-template-columns:repeat(2,minmax(0,1fr))} .fact:nth-child(odd){border-left:0} .fact:nth-child(n+3){border-top:1px solid var(--line)} .flinks .copy-btn{margin-left:0} }
 .pcards .detail{border-top:0;border-bottom:1px solid var(--line);border-radius:0}
 .detail h3{font-family:var(--serif);font-size:16px;font-weight:600;margin:0}
 .dh{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:8px}
@@ -261,9 +270,6 @@ select.active{border-color:var(--ink);background:var(--hi)}
 .iact .links{margin-right:6px}
 
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:40;background:var(--ink);color:#fff;border-radius:999px;padding:9px 10px 9px 18px;font-size:14px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 24px rgba(40,30,20,.25);max-width:calc(100vw - 32px)}
-.demo-tag{display:inline-block;vertical-align:middle;margin-left:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--warn);border-radius:999px;padding:3px 10px;position:relative;top:-3px}
-.demo-note{border:1px solid var(--warn);background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px}
-.demo-note b{color:var(--warn)}
 .savebar{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:41;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:999px;padding:7px 16px;font-size:13.5px;font-weight:600;max-width:calc(100vw - 32px);box-shadow:0 6px 18px rgba(40,30,20,.15)}
 .toast button{font-size:14px;font-weight:700;background:none;border:0;color:#fff;text-decoration:underline;cursor:pointer;padding:2px 6px}
 footer{font-size:13px;color:var(--muted);max-width:75ch}
@@ -271,7 +277,7 @@ footer ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 
 @media (max-width:760px){
   body{padding-top:20px}
-  .steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .steps li::after{display:none}
   .pc{grid-template-columns:minmax(0,1fr) auto}
   .pc .when{grid-column:1;grid-row:2}
@@ -304,12 +310,13 @@ body.signed-out .wrap{display:none}
 .si-msg.err{color:var(--warn)} .si-msg.ok{color:var(--ok);font-weight:600}
 .si-note{margin:0;font-size:12.5px;color:var(--muted)}
 footer .who{margin:10px 0 0}
+
 /* Internship compiler visual refresh */
 :root{
   color-scheme:light;
   --paper:#F3F6FA; --sand:#E9EEF5; --surface:#FFFFFF; --ink:#14243B; --muted:#596B83; --faint:#8291A5;
-  --line:#DFE6EF; --line-strong:#C8D3E1; --hi:#E6F5F2;
-  --brand:#007E78; --brand-deep:#005C58; --brand-soft:#E6F5F2; --signal:#DDF264;
+  --line:#DFE6EF; --line-strong:#C8D3E1; --hi:#EDF1FF;
+  --brand:#355CFF; --brand-deep:#2344CF; --brand-soft:#EDF1FF; --signal:#D8F36A;
   --star:var(--brand); --star-soft:var(--brand-soft);
   --warn:#B64C43; --warn-soft:#FCEDEA; --ok:#18745F; --ok-soft:#E4F4EE;
   --serif:"Space Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -322,7 +329,7 @@ body::before{content:"";position:fixed;z-index:50;inset:0 0 auto;height:4px;back
 header.top{
   position:relative;isolation:isolate;overflow:hidden;align-items:center;min-height:142px;
   padding:26px 30px;border:0;border-radius:18px;
-  background:linear-gradient(115deg,#13243B 0%,#1C3556 72%,#005C58 140%);
+  background:linear-gradient(115deg,#13243B 0%,#1C3556 72%,#2344CF 140%);
   box-shadow:0 12px 30px rgba(19,36,59,.12);color:#fff
 }
 header.top::after{
@@ -380,7 +387,7 @@ select.active,.tog.active,.ms-btn.active{border-color:var(--brand);background:va
 .ms-item:hover{background:#F3F6FA}
 .countline{color:var(--muted)}
 .all-btn{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-deep);border-radius:8px}
-.all-btn:hover{background:#DDF264;color:#17243A}
+.all-btn:hover{background:#D8F36A;color:#17243A}
 .all-btn[aria-pressed="true"]{background:#fff;color:var(--ink);border-color:var(--line-strong)}
 .pill,.exp-btn,.copy-btn,.rej{border-color:var(--line-strong);background:#fff;color:var(--ink)}
 .next{background:var(--brand);border-color:var(--brand);border-radius:8px}
@@ -434,7 +441,6 @@ footer li+li{margin-top:5px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 
 
-
 /* Header refinement: quiet, editorial masthead */
 body::before{display:none}
 header.top{
@@ -475,17 +481,19 @@ header.top p a{color:var(--brand)}
 .jdtext{max-height:520px;line-height:1.65}
 @media(max-width:760px){.detail{grid-template-columns:1fr}.facts{margin-bottom:0}}
 
+.demo-tag{display:inline-block;vertical-align:middle;margin-left:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--warn);border-radius:999px;padding:3px 10px;position:relative;top:-3px}
+.demo-note{border:1px solid var(--warn);background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:14px}
+.demo-note b{color:var(--warn)}
 </style>
 </head><body>
 <div class="wrap">
   <header class="top">
     <div><h1>In-Quarter Internship Compiler <span class="demo-tag">Demo</span></h1>
-    <p>Part-time, school-year MBA internships that are remote, in Chicago, or flexible on location · <a href="../">Summer 2027 demo</a></p></div>
+    <p>Part-time, school-year MBA internships that are remote, in Chicago, or flexible on location · <a href="../">Summer 2027 demo</a> · <a href="../full-time/">Full-time demo</a></p></div>
     <dl class="stamps" id="upd" aria-label="Last updated"></dl>
   </header>
 
-  <div class="demo-note"><b>This is a demo.</b> Every company and role here is made up, so nothing is a real job posting. The real version is used by Booth classmates behind a school login. Stars and pipeline changes you make are saved only in this browser.</div>
-
+  <div class="demo-note"><b>This is a demo.</b> Every company, role and event here is made up, so nothing is a real job posting. The real version is used by Booth classmates behind a school login. Stars and pipeline changes you make are saved only in this browser.</div>
   <div class="banner" id="banner" hidden></div>
 
   <section class="pipe" id="pipe" aria-label="My pipeline">
@@ -493,6 +501,7 @@ header.top p a{color:var(--brand)}
     <div class="pipe-body" id="pipe-body" hidden>
       <div class="pipe-note" id="pipe-note">Only you can see this.</div>
       <ol class="steps" id="steps"></ol>
+      <div class="psearch" role="search"><input id="pq" type="search" placeholder="Search my pipeline: company, role, or city" aria-label="Search my pipeline"><button type="button" class="pclear" id="pq-clear" hidden>Clear</button></div>
       <div class="pcards" id="pcards"></div>
     </div>
   </section>
@@ -533,21 +542,22 @@ header.top p a{color:var(--brand)}
     <ul>
       <li>Roles come only from the Booth Career Portal (BCP) and refresh twice a day: part-time during the school year, and remote, Chicago-based, or flexible on location.</li>
       <li>Full-time off-cycle internships, co-ops, and part-time roles that need you in person outside Chicago are left out.</li>
-      <li>Your pipeline, stars, notes and skips are private to you and separate from the Summer 2027 board. Each classmate signs in with their own Booth email and starts with an empty pipeline.</li>
+      <li>Your pipeline, stars, notes and skips are private to you and separate from the Summer 2027 board. In the real version each classmate signs in with their own Booth email and starts with an empty pipeline; in this demo they stay in your browser.</li>
       <li>This demo runs on fictional sample data.</li>
       <li>"No visa sponsorship" only appears when the posting says so (or the company is known not to sponsor), so always check the posting.</li>
     </ul>
   </footer>
 </div>
 
+<script>window.IC_BOARD = { prefix: "iq-", title: "In-Quarter Internship Compiler", sub: "Part-time, school-year MBA internships for Booth students: remote, in Chicago, or flexible on location." };</script>
 <script src="iq-shim.js"></script>
 <script>
 (function(){
   const SLOW_MSG = "Still loading. Check your connection and refresh the page.";
-  const OWNER_EMAIL = "jjeong0@chicagobooth.edu";
+  const OWNER_EMAIL = "owner@example.com";
   const FUNCS = ["Product management","Marketing","Corporate strategy","Company finance / BD","Gen mgmt / leadership programs","Operations / supply chain","General / multiple"];
-  const STAGES = [["Applied","Applied"],["Interviewing","Interviewing"],["Offer","Offer"]];
-  const NEXT = { Applied:["Interviewing","Interviewing →"], Interviewing:["Offer","Got offer →"] };
+  const STAGES = [["Applied","Applied"],["Interviewing","Interviewing"],["Offer","Offer"],["Rejected","Rejected"]];
+  const NEXT = { Applied:["Interviewing","Interviewing →"], Interviewing:["Offer","Got offer →"], Rejected:["Applied","↺ Back to Applied"] };
   const TODAY = new Date(); TODAY.setHours(0,0,0,0);
   const NOW = new Date();
   const state = { roles: [], companies: {}, meta: null, mine: {}, uid: undefined, canTrack: false, denied: false,
@@ -599,6 +609,8 @@ header.top p a{color:var(--brand)}
   const fmtShort = d => { const t = parseDay(d); return t ? t.toLocaleDateString(undefined,{month:"short",day:"numeric"}) : ""; };
   const mineOf = k => state.mine[k] || (state.aliasOf[k] || []).map(o => state.mine[o]).find(Boolean) || null;
   const roleStatus = k => { const m = mineOf(k); return (m && m.s) || "Not started"; };
+  // True once a role has been in the pipeline, even if it was taken back out. An undo leaves an empty history, so it doesn't count.
+  const wasTracked = k => { const m = mineOf(k); return !!m && (!Array.isArray(m.hist) || m.hist.length > 0); };
   const visaOf = r => state.visa[r.key] || (state.aliasOf[r.key] || []).map(o => state.visa[o]).find(Boolean) || null;
   const EVKIND = { "Coffee chats":"Meet & greet", "Networking":"Networking", "Workshop":"Workshop", "Info session":"Info session" };
   function eventsFor(r){ const k = coKey(r), n = norm(r.company), now = new Date();
@@ -803,15 +815,21 @@ header.top p a{color:var(--brand)}
     for (const r of state.roles){ const s = roleStatus(r.key); if (out[s]) out[s].push(r); }
     const dl = r => { const d = daysLeft(r); return d === null ? 9999 : d; };
     out.Interested.sort((a,b) => (isClosed(a) - isClosed(b)) || dl(a) - dl(b) || coName(a).localeCompare(coName(b)));
-    ["Applied","Interviewing","Offer"].forEach(s => out[s].sort((a,b) => ((mineOf(b.key)||{}).at||"").localeCompare((mineOf(a.key)||{}).at||"")));
+    ["Applied","Interviewing","Offer","Rejected"].forEach(s => out[s].sort((a,b) => ((mineOf(b.key)||{}).at||"").localeCompare((mineOf(a.key)||{}).at||"")));
     return out;
   }
   function setPipeOpen(open){ state.pipeOpen = open; $("pipe-body").hidden = !open; $("pipe-toggle").setAttribute("aria-expanded", String(open)); $("pipe-chev").textContent = open ? "Close" : "Open"; }
   $("pipe-toggle").addEventListener("click", () => setPipeOpen(!state.pipeOpen));
+  let pq = "";
+  const pqMatch = r => { if (!pq) return true; const hay = [coName(r), r.company, r.title, r.location, r.function].filter(Boolean).join(" ").toLowerCase();
+    return pq.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w)); };
+  $("pq").addEventListener("input", e => { pq = e.target.value.trim(); $("pq-clear").hidden = !pq; renderPipe(); });
+  $("pq-clear").addEventListener("click", () => { pq = ""; $("pq").value = ""; $("pq-clear").hidden = true; renderPipe(); $("pq").focus(); });
   function renderPipe(){
-    const P = pipeline(), steps = $("steps"); steps.textContent = "";
+    const P0 = pipeline(), steps = $("steps"); steps.textContent = "";
+    const P = {}; Object.keys(P0).forEach(s => { P[s] = P0[s].filter(pqMatch); });
     $("pipe-sum").textContent = !state.trackerLoaded ? "" :
-      STAGES.map(([s, label]) => `${P[s].length} ${label.replace("★ ","").toLowerCase()}`).join(" · ");
+      STAGES.map(([s, label]) => `${P0[s].length} ${label.replace("★ ","").toLowerCase()}`).join(" · ");
     STAGES.forEach(([s, label]) => { const li = el("li"); const b = el("button","step"); b.type = "button";
       b.setAttribute("aria-pressed", String(state.stage === s));
       b.append(el("span","n", state.trackerLoaded ? String(P[s].length) : "–"), el("span","l", label));
@@ -823,11 +841,13 @@ header.top p a{color:var(--brand)}
     if (state.denied){ box.appendChild(el("div","pempty","This link only lets you look. Ask whoever shared it for access that lets you use the page, and your pipeline will save.")); return; }
     if (!state.canTrack && state.uid === null && state.roles.length){ box.appendChild(el("div","pempty","Sign in to keep your own pipeline.")); return; }
     if (!state.trackerLoaded){ box.appendChild(el("div","pempty","Loading your pipeline…")); return; }
-    const total = STAGES.reduce((a,[s]) => a + P[s].length, 0);
+    const total = STAGES.reduce((a,[s]) => a + P0[s].length, 0);
     if (!total){ box.appendChild(el("div","pempty","Nothing applied yet. Hit Mark applied on a role below and track it here through interviews and offers.")); return; }
     const items = P[state.stage];
+    if (pq && !items.length){ const hits = STAGES.filter(([s]) => P[s].length).map(([s,l]) => `${P[s].length} in ${l}`);
+      box.appendChild(el("div","pempty", hits.length ? `No match in ${STAGES.find(x=>x[0]===state.stage)[1]} for “${pq}”. Found ${hits.join(", ")}: tap that stage above.` : `Nothing in your pipeline matches “${pq}”.`)); return; }
     if (!items.length){ box.appendChild(el("div","pempty", state.stage === "Interested" ? "No favorites waiting. Tap ☆ next to a role below to add one." : `Nothing at ${STAGES.find(x=>x[0]===state.stage)[1]} yet. Move a role here with one click from the stage before it.`)); return; }
-    const LIMIT = 8, shown = state.pAll ? items : items.slice(0, LIMIT);
+    const shown = items;
     const can = canWrite();
     for (const r of shown){
       const card = el("div","pc"); if (state.stage === "Interested" && isClosed(r)) card.classList.add("closed");
@@ -844,16 +864,17 @@ header.top p a{color:var(--brand)}
       const nx = NEXT[state.stage];
       if (nx){ const b = el("button","next", nx[1]); b.type = "button"; b.disabled = !can;
         b.addEventListener("click", () => moveRole(r, nx[0], `${coName(r)} moved to ${STAGES.find(x=>x[0]===nx[0])[1]}`)); act.appendChild(b); }
+      if (["Applied","Interviewing","Offer"].includes(state.stage)){ const rj = el("button","rej","Rejected"); rj.type = "button"; rj.disabled = !can; rj.title = "Mark as rejected (moves it to Rejected)";
+        rj.setAttribute("aria-label", `Mark as rejected: ${coName(r)}, ${r.title}`);
+        rj.addEventListener("click", () => moveRole(r, "Rejected", `${coName(r)} moved to Rejected`)); act.appendChild(rj); }
       const x = el("button","x","✕"); x.type = "button"; x.disabled = !can;
-      const out = state.stage === "Interested" ? "Not started" : "Rejected";
-      x.title = state.stage === "Interested" ? "Remove from favorites" : "Take off my pipeline (rejected or withdrew)";
+      const out = "Not started";
+      x.title = state.stage === "Interested" ? "Remove from favorites" : "Take off my pipeline (withdrew or no longer tracking)";
       x.setAttribute("aria-label", `${x.title}: ${coName(r)}, ${r.title}`);
       x.addEventListener("click", () => moveRole(r, out, `Took ${coName(r)} off your pipeline`)); act.appendChild(x);
       card.appendChild(act); box.appendChild(card);
       if (state.popen.has(r.key)) box.appendChild(detailFor(r, "p"));
     }
-    if (items.length > LIMIT){ const m = el("button","more", state.pAll ? "Show fewer" : `Show all ${items.length}`); m.type = "button";
-      m.addEventListener("click", () => { state.pAll = !state.pAll; render(); }); box.appendChild(m); }
   }
 
   // ---------- role list
@@ -873,7 +894,7 @@ header.top p a{color:var(--brand)}
       return true;
     });
     const dl = r => { const d = daysLeft(r); return d === null ? 9999 : d; };
-    const fresh = r => isNew(r) && !isClosed(r) && !opensAt(r) && !state.triaged[r.key] && roleStatus(r.key) === "Not started";
+    const fresh = r => isNew(r) && !isClosed(r) && !opensAt(r) && !state.triaged[r.key] && !wasTracked(r.key);
     rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || (fresh(b) - fresh(a)) || (opensAt(a) && opensAt(b) ? opensAt(a) - opensAt(b) : 0) || dl(a)-dl(b) || coName(a).localeCompare(coName(b)) || a.title.localeCompare(b.title));
     state.shown = rows;
     const filtered = !!(f.q || f.cos.length || f.fn || f.visaHide);
@@ -900,6 +921,7 @@ header.top p a{color:var(--brand)}
         st.addEventListener("click", () => setRole(r.key, s === "Interested" ? "Not started" : "Interested")); row.appendChild(st); }
       const main = el("div"); const co = el("div","co", coName(r));
       if (["Applied","Interviewing","Offer"].includes(s)) co.appendChild(tag("stage", s));
+      if (s === "Rejected") co.appendChild(tag("plain", "Rejected"));
       if (fresh(r)) co.appendChild(tag("new","New"));
       main.appendChild(co); main.appendChild(el("div","ti", r.title));
       main.appendChild(el("div","sub", [r.location, r.workMode, r.function].filter(Boolean).join(" · ")));
@@ -988,7 +1010,7 @@ header.top p a{color:var(--brand)}
     }
     return out;
   }
-  const reviewed = it => !!state.triaged[it.id] || roleStatus(it.id) !== "Not started";
+  const reviewed = it => !!state.triaged[it.id] || wasTracked(it.id);
   function triage(it, how){
     if (!canWrite()) return;
     const k = it.id, name = coName(it.item);
@@ -1090,9 +1112,9 @@ header.top p a{color:var(--brand)}
   // ---------- job description sections (parsed in the page; no AI)
   function parseJD(text){
     const R_PREF = /\b(preferred|nice[- ]to[- ]haves?|bonus points|desired|desirable|pluses|a plus|additional qualifications|ideal(ly)? (candidate|you)|extra credit|it would be great|ways to stand out|stand out|set yourself apart|what sets you apart)\b/i;
-    const R_QUAL = /\b(qualifications?|requirements?|required|what you('|’)?ll need|what you need|what we('|’)?re looking for|what we look for|who you are|you have|you bring|what you bring|must[- ]haves?|minimum|basic|skills|eligibility|about you|your background|experience|you are|you should have|to be successful|you('|’)?re a fit|what we need to see|profile|who you('|’)?ll be|what it takes|candidate requirements)\b/i;
-    const R_RESP = /\b(responsibilit\w*|duties|accountabilit\w*|what you('|’)?ll do|what you will do|what you('|’)?ll be doing|what you will be doing|in this role|day[- ]to[- ]day|your impact|what you('|’)?ll work on|key activities|the role|role overview|position summary|job summary|internship (overview|description|details)|projects?|the work|your role|what you('|’)?ll learn|the opportunity|you will)\b/i;
-    const R_OTHER = /\b(about (us|the company|the team)|who we are|benefits|compensation|pay range|salary|base pay|equal (employment )?opportunit\w*|eeo|why (join|work)|perks|our (team|company|culture|values|mission)|how to apply|additional information|disclaimer|accommodations?|work authorization|location|program dates|timeline|recruiting process|application process|deadline|company overview|diversity|privacy|legal)\b/i;
+    const R_QUAL = /\b(qualifications?|requirements?|required|what you('|’)?ll need|what you need|what we('|’)?re looking for|what we look for|who you are|you have|you bring|what you bring|must[- ]haves?|minimum|basic|skills|eligibility|about you|your background|experience|you are|you should have|to be successful|you('|’)?re a fit|what we need to see|profile|who you('|’)?ll be|what it takes|candidate requirements|hear from you if|great fit|you('|’)?ll bring|what you('|’)?ll need to succeed|ideal profile)\b/i;
+    const R_RESP = /\b(responsibilit\w*|duties|accountabilit\w*|what you('|’)?ll do|what you will do|what you('|’)?ll be doing|what you will be doing|in this role|day[- ]to[- ]day|your impact|what you('|’)?ll work on|key activities|the role|role overview|position summary|job summary|internship (overview|description|details)|projects?|the work|your role|what you('|’)?ll learn|the opportunity|you will|your time here|job description|expected (job )?duties|key projects|what the job involves)\b/i;
+    const R_OTHER = /\b(about (us|the company|the team)|who we are|benefits|compensation|pay range|salary|base pay|equal (employment )?opportunit\w*|eeo|why (join|work)|perks|our (team|company|culture|values|mission)|how to apply|additional information|disclaimer|accommodations?|work authorization|location|program dates|timeline|recruiting process|application process|deadline|company overview|diversity|privacy|legal|what you can expect|why you('|’)?ll love|what we offer)\b/i;
     const R_JUNK = /(\$\s?\d|pay is determined|equal (employment )?opportunit|\beeo\b|is proud to be|accommodation|this posting|disclaimer|salary range|pay range|base salary|benefits include|we offer|click apply|apply now|e-verify)/i;
     const lines = (text||"").replace(/\r/g,"").split("\n").map(s => s.replace(/ /g," ").trim());
     const secs = { resp: [], qual: [], pref: [] }; let cur = null;
@@ -1104,14 +1126,15 @@ header.top p a{color:var(--brand)}
     for (const raw of lines){
       if (!raw) continue;
       const bullet = isBullet(raw), s = clean(raw);
+      const hs = s.replace(/^[^\p{L}\p{N}]+/u, "").replace(/\s*(\.{2,}|…)\s*$/, "").trim();
       let head = null, rest = "";
       if (!bullet){
-        const m = s.match(/^([^:.!?]{3,70}):\s*(.*)$/);
+        const m = hs.match(/^([^:.!?]{3,70}):\s*(.*)$/);
         if (m && classify(m[1])) { head = classify(m[1]); rest = m[2]; }
-        else if (s.length <= 70 && !/[.;,]$/.test(s) && classify(s)) {
+        else if (hs.length <= 70 && !/[.;,]$/.test(hs) && classify(hs)) {
           // short heading-like line (title case or all caps or few words)
-          const words = s.split(/\s+/).length;
-          if (words <= 9) head = classify(s);
+          const words = hs.split(/\s+/).length;
+          if (words <= 9) head = classify(hs);
         }
       }
       if (head){ cur = head === "other" ? null : head; if (cur && rest) secs[cur].push(rest); continue; }
@@ -1124,8 +1147,33 @@ header.top p a{color:var(--brand)}
         else arr.push(s);
       }
     }
+    if (!secs.resp.length && !secs.qual.length){
+      const NEED = /\b(pursuing|enrolled|degree|MBA|master|bachelor|years?\b.*experience|experience (in|with)|proficien|skills?\b|ability to|able to|strong|excellent|knowledge of|familiar|understanding of|track record|comfort(able)? with)\b/i;
+      const bl = lines.filter(l => l && isBullet(l)).map(clean).filter(x => x.length > 3 && !R_JUNK.test(x));
+      if (bl.length >= 3) bl.forEach(x => secs[NEED.test(x) ? "qual" : "resp"].push(x));
+    }
     for (const k of Object.keys(secs)) secs[k] = secs[k].filter((v,i,a) => a.indexOf(v) === i).slice(0, 14);
     return secs;
+  }
+  // Length, hours and where you work, e.g. "10–12 weeks · 15–20 hrs/wk · Hybrid".
+  function findSchedule(r, text){
+    const t = (text || "").replace(/\s+/g, " "), out = [];
+    const w = t.match(/\b(\d{1,2})\s*(?:(?:–|-|—|to)\s*(\d{1,2})\s*)?-?\s*weeks?\b/i);
+    if (w && +w[1] >= 4 && +w[1] <= 30) out.push(w[2] ? `${w[1]}–${w[2]} weeks` : `${w[1]} weeks`);
+    const mo = "(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?";
+    const RX = new RegExp(`\\b${mo}(?:\\s+\\d{1,2}(?!\\d))?,?(?:\\s+20\\d\\d)?\\s*(?:–|-|—|to|through)\\s*${mo}(?:\\s+\\d{1,2}(?!\\d))?,?(?:\\s+20\\d\\d)?`, "gi");
+    for (const m of t.matchAll(RX)){
+      if (/(graduat|class of|degree|enrolled|appl(y|ication)|recruit|deadline)/i.test(t.slice(Math.max(0, m.index - 60), m.index))) continue;
+      out.push(m[0].replace(/\s*(–|-|—|to|through)\s*/, "–").replace(/[,.\s]+$/, "")); break;
+    }
+    const h = r.hours || ((t.match(/\b(\d{1,2})\s*(?:(?:–|-|—|to)\s*(\d{1,2})\s*)?(?:hours|hrs)\s*(?:per|a|\/)\s*week\b/i) || [])[0] || "").replace(/\s*(hours|hrs)\s*(per|a|\/)\s*week/i, " hrs/wk");
+    if (h) out.push(h);
+    if (!r.workMode){
+      if (/\bhybrid\b/i.test(t)) out.push("Hybrid");
+      else if (/\b(fully remote|remote[- ]first|100% remote|work remotely)\b/i.test(t)) out.push("Remote");
+      else if (/\b(on[- ]?site|in[- ]office|in person)\b/i.test(t)) out.push("On-site");
+    }
+    return out.slice(0, 3).join(" · ") || null;
   }
   function findPay(text){
     const R_JUNK = /(\$\s?\d|pay is determined|equal (employment )?opportunit|\beeo\b|is proud to be|accommodation|this posting|disclaimer|salary range|pay range|base salary|benefits include|we offer|click apply|apply now|e-verify)/i;
@@ -1180,7 +1228,7 @@ header.top p a{color:var(--brand)}
   function jdSummary(r, text){
     const box = el("div","jdsum"), secs = parseJD(text);
     const SHOW = 5; let found = 0;
-    [["resp","What you'll do"],["qual","What they're looking for"],["pref","Nice to have"]].forEach(([k,label]) => {
+    [["resp","What you'll do"],["qual","What they’re looking for"],["pref","Nice to have"]].forEach(([k,label]) => {
       const items = tidyItems(secs[k]); if (!items.length) return; found += items.length;
       const d = el("div","jdsec"); d.appendChild(el("h4",null,label)); const ul = el("ul");
       items.forEach((t, i) => { const li = jdItem(t); if (i >= SHOW) li.hidden = true; ul.appendChild(li); });
@@ -1229,6 +1277,7 @@ header.top p a{color:var(--brand)}
       fact("Deadline", dv);
       fact("Location", el("div","fv", [r.location, r.workMode].filter(Boolean).join(" · ") || "Not listed"));
       const payv = el("div","fv","…"); fact("Pay", payv);
+      const schv = el("div","fv","…"); fact("Schedule", schv);
       const vv = visaOf(r), visav = el("div","fv"); let vcls = "", vq = null;
       if (coVisaNo(r) && !(vv && (vv.status === "no" || vv.status === "yes"))){ visav.textContent = "Won't sponsor"; vcls = "bad"; vq = "Known company policy; the posting itself doesn't say."; }
       else if (vv && vv.status === "no"){ visav.textContent = "Won't sponsor"; vcls = "bad"; vq = vv.quote ? "“…" + vv.quote + "…”" : null; }
@@ -1241,7 +1290,8 @@ header.top p a{color:var(--brand)}
       const cp = el("button","copy-btn","Copy description"); cp.type = "button"; cp.title = "Copy the job description"; fl.appendChild(cp);
       facts.appendChild(fl);
       // left: the posting
-      const left = el("div"); const lh = el("div","jdhead"); lh.appendChild(el("h3",null,"About the role")); const src = el("span","dsrc"); lh.appendChild(src); left.appendChild(lh);
+      const left = el("div"); const lh = el("div","jdhead"); lh.appendChild(el("h3",null,"About the role")); const src = el("span","dsrc"); lh.appendChild(src);
+      const cp2 = el("button","copy-btn jdcopy","Copy job description"); cp2.type = "button"; cp2.title = "Copy the full job description to paste elsewhere"; lh.appendChild(cp2); left.appendChild(lh);
       const sumWrap = el("div"); left.appendChild(sumWrap);
       const ftog = el("button","fulltog","Show full posting ▾"); ftog.type = "button"; ftog.hidden = true; left.appendChild(ftog);
       const jd = el("div","jdtext","Loading…"); left.appendChild(jd);
@@ -1267,13 +1317,17 @@ header.top p a{color:var(--brand)}
       if (!state.canTrack){ paste.disabled = notes.disabled = true; notes.placeholder = "Sign in to keep private notes."; }
       notes.addEventListener("input", () => { const v = prepCache.get(k); if (v){ v.notes = notes.value; savePrep(k); } });
       paste.addEventListener("input", () => { const v = prepCache.get(k); if (v){ v.jd = paste.value; savePrep(k); } });
-      cp.addEventListener("click", async () => { const t = !jd.hidden ? jd.textContent : paste.value; if (!t || t === "Loading…"){ toast("No description to copy yet"); return; }
-        const head = `${coName(r)} — ${r.title}\n${r.location || ""}\n\n`; const ok = await copyText(head + t); cp.textContent = ok ? "Copied ✓" : "Copy failed"; setTimeout(() => { cp.textContent = "Copy"; }, 1800); });
+      const doCopy = async (btn, label) => { const t = (jd.textContent && jd.textContent !== "Loading…") ? jd.textContent : paste.value; if (!t){ toast("No description to copy yet"); return; }
+        const head = `${coName(r)} — ${r.title}\n${r.location || ""}\n\n`; const ok = await copyText(head + t); btn.textContent = ok ? "Copied ✓" : "Copy failed"; setTimeout(() => { btn.textContent = label; }, 1800); };
+      cp.addEventListener("click", () => doCopy(cp, "Copy description"));
+      cp2.addEventListener("click", () => doCopy(cp2, "Copy job description"));
       Promise.all([loadJD(k), loadPrep(k)]).then(([shared, mine]) => {
         notes.value = mine.notes || "";
         const jdText = shared && shared.text ? shared.text : (mine.jd || "");
         payv.textContent = compactPay(shared && shared.pay) || compactPay(findPay(jdText)) || "Not listed";
         if (payv.textContent === "Not listed") payv.parentNode.classList.add("muted");
+        schv.textContent = findSchedule(r, jdText) || "Not stated";
+        if (schv.textContent === "Not stated") schv.parentNode.classList.add("muted");
         if (shared && shared.text){ jd.textContent = shared.text; src.textContent = "From " + (shared.source || "the posting") + (shared.capturedAt ? ", saved " + fmtHistDay(shared.capturedAt) : "");
           showSummary(shared.text); }
         else if (mine.jd){ jd.hidden = true; paste.hidden = false; paste.value = mine.jd; src.textContent = "Pasted by you"; showSummary(mine.jd); ftog.hidden = true; }
@@ -1331,7 +1385,7 @@ header.top p a{color:var(--brand)}
       all.forEach(r => { if (r.mergedInto) (al[r.mergedInto] = al[r.mergedInto] || []).push(r.key); (r.mergedFrom || []).forEach(o => (al[r.key] = al[r.key] || []).push(o)); });
       state.aliasOf = al; state.roles = all.filter(r => !r.mergedInto && !r.hidden && isBcp(r)); render(); }, () => { $("count").textContent = "The role list stopped updating. Reload the page to reconnect."; });
     db.collection("visa").onSnapshot(s => { const v = {}; s.docs.filter(x=>x.exists).forEach(x => v[x.id] = x.data()); state.visa = v; render(); }, () => {});
-    db.collection("events").onSnapshot(s => { state.events = snap(s); state.eventsLoaded = true; render(); }, () => { state.eventsLoaded = true; });
+    db.collection("events").onSnapshot(s => { state.events = snap(s).filter(e => !e.hidden); state.eventsLoaded = true; render(); }, () => { state.eventsLoaded = true; });
     db.collection("changes").onSnapshot(s => { state.changes = snap(s).sort((a,b) => (b.at||"").localeCompare(a.at||"")); rebuildNew(); render(); }, () => {});
     db.doc("meta/sync").onSnapshot(d => { state.meta = d.exists ? d.data() : null; renderSync(); }, () => {});
     let uid = null;
