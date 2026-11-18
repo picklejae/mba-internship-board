@@ -2,7 +2,7 @@
 
 **A shared job board that I designed and run for my MBA classmates.** It collects Summer 2027 internships at tech and corporate employers into one list, refreshes twice a day, and gives each person a private application pipeline.
 
-> **Live demo:** open `index.html` in a browser, or see the GitHub Pages link in the repo sidebar. The demo runs on **fictional sample data** (made-up companies, roles and links). The production version reads from private sources that aren't part of this repo.
+> **Live demo:** open `index.html` in a browser, or see the GitHub Pages link in the repo sidebar. There are three boards: Summer 2027 (`index.html`), In-Quarter (`in-quarter/`) and Full-Time (`full-time/`). The demo runs on **fictional sample data** (made-up companies, roles and links). The production version reads from private sources that aren't part of this repo.
 
 ![First visit: every open role, soonest deadline first](docs/1-first-visit.png)
 
@@ -121,6 +121,8 @@ There's nothing to install. Your demo pipeline is saved in your browser's `local
 |---|---|
 | `index.html` | The board: the same page code as production, with personal details removed |
 | `demo-shim.js` | Stand-in runtime: sample data, a fake database, and local storage for your pipeline |
+| `in-quarter/` | Demo of the In-Quarter board: part-time, school-year roles, with its own sample data (`iq-shim.js`) |
+| `full-time/` | Demo of the Full-Time Compiler: post-MBA full-time roles and recruiting events, built from the current production page, with its own sample data (`ft-shim.js`) |
 | `docs/` | Screenshots |
 
 **Not included:** the live data and the refresh jobs. They read from my school's career portal and other sites under those sites' own terms, and job descriptions belong to the employers that wrote them.
