@@ -504,7 +504,7 @@ body.signed-out{background:#800000;min-height:100vh}
       </div>
     </div>
     <select id="function" aria-label="Function"></select>
-    <select id="sort" aria-label="Sort roles" title="Sort the role list"><option value="">Sort: soonest deadline</option><option value="new">Sort: newest posted</option></select>
+    <select id="sort" aria-label="Sort roles" title="Sort the role list"><option value="">Sort: newest posted</option><option value="deadline">Sort: soonest deadline</option></select>
     <label class="tog" id="allWrap"><input type="checkbox" id="allchk"> Show all roles</label>
     <label class="tog" id="visaWrap" title="Hides roles whose posting says they won't sponsor a visa. Roles that don't mention visas stay."><input type="checkbox" id="visa"> Hide no visa sponsorship</label>
   </section>
@@ -706,7 +706,7 @@ body.signed-out{background:#800000;min-height:100vh}
     const evs = state.track === "events";
     $("filters").hidden = inbox; $("ibar").hidden = !inbox;
     ["function","sort","allWrap","visaWrap"].forEach(id => { $(id).hidden = evs; });
-    $("sort").value = state.f.sort || ""; $("sort").classList.toggle("active", !!state.f.sort);
+    if (state.f.sort !== "deadline") state.f.sort = ""; $("sort").value = state.f.sort; $("sort").classList.toggle("active", !!state.f.sort);
     $("q").placeholder = evs ? "Search company or event" : "Search company, role, or city"; $("tabnote").hidden = !(inbox || evs);
     $("tabnote").textContent = "Roles added since you last pressed Clear. Save the ones you like to your pipeline and skip the rest (or swipe right and left on a phone). Anything you don't touch stays here and new roles pile on until you press Clear.";
     document.querySelectorAll(".track button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.track === state.track)));
@@ -874,10 +874,14 @@ body.signed-out{background:#800000;min-height:100vh}
     });
     const dl = r => { const d = daysLeft(r); return d === null ? 9999 : d; };
     const fresh = r => isNew(r) && !isClosed(r) && !opensAt(r) && !state.triaged[r.key] && !wasTracked(r.key);
-    const byNew = f.sort === "new";
-    if (byNew) rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || postedOf(b).localeCompare(postedOf(a)) || dl(a)-dl(b) || coName(a).localeCompare(coName(b)) || a.title.localeCompare(b.title));
-    else rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || (fresh(b) - fresh(a)) || (opensAt(a) && opensAt(b) ? opensAt(a) - opensAt(b) : 0) || dl(a)-dl(b) || coName(a).localeCompare(coName(b)) || a.title.localeCompare(b.title));
-    const order = byNew ? "newest posted first" : "soonest deadline first";
+    // Default: newest posted first. Either way, rolling roles (no deadline: apply early) go on top
+    // and roles that haven't opened yet go last.
+    const byNew = f.sort !== "deadline";
+    const rolling = r => !opensAt(r) && daysLeft(r) === null && !isClosed(r);
+    const tail = (a,b) => coName(a).localeCompare(coName(b)) || a.title.localeCompare(b.title);
+    if (byNew) rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || (rolling(b) - rolling(a)) || postedOf(b).localeCompare(postedOf(a)) || dl(a)-dl(b) || tail(a,b));
+    else rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || (rolling(b) - rolling(a)) || (fresh(b) - fresh(a)) || (opensAt(a) && opensAt(b) ? opensAt(a) - opensAt(b) : 0) || dl(a)-dl(b) || postedOf(b).localeCompare(postedOf(a)) || tail(a,b));
+    const order = byNew ? "rolling first, then newest posted" : "rolling first, then soonest deadline";
     state.shown = rows;
     const filtered = !!(f.q || f.cos.length || f.fn || f.visaHide);
     $("clear").hidden = !filtered;
@@ -914,7 +918,7 @@ body.signed-out{background:#800000;min-height:100vh}
       if (tg.childNodes.length) main.appendChild(tg);
       row.appendChild(main);
       const wb = whenBox(r);
-      if (state.f.sort === "new" && postedOf(r)) wb.appendChild(el("span","posted","Posted " + fmtShort(postedOf(r))));
+      if (state.f.sort !== "deadline" && postedOf(r)) wb.appendChild(el("span","posted","Posted " + fmtShort(postedOf(r))));
       row.appendChild(wb);
       const links = linkSet(r);
       const isOpen = state.open.has(r.key);
