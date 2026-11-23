@@ -75,6 +75,7 @@ header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items
 .when.soon .left{color:#9A6210;font-weight:600}
 .when.rolling b{color:#4E7A46}
 .when.opens b{color:#2F5E9E}
+.when .posted{font-size:12px;color:var(--muted)}
 .groupdiv.newg{background:var(--star-soft);color:#8A5E12}
 .groupdiv.restg{background:var(--paper);color:var(--muted)}
 .groupdiv{padding:9px 16px;background:#EEF3FA;border-top:1px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#2F5E9E}
@@ -414,6 +415,12 @@ footer li+li{margin-top:5px}
 .si-row input,.si-row button,#si-code{border-radius:8px}
 .si-row button{background:var(--brand);border-color:var(--brand)}
 .si-row button:hover:not(:disabled){background:var(--brand-deep)}
+body.signed-out{background:#800000;min-height:100vh}
+.signed-out .si-card{background:#FFF9F6;border:1px solid #E8CEC9;border-top:4px solid #C68C85;box-shadow:0 20px 48px rgba(52,0,0,.35);color:#382629}
+.signed-out .si-sub,.signed-out .si-note{color:#665055}
+.signed-out .si-row input{background:#fff;border-color:#B89A98}
+.signed-out .si-form .lnk{color:#800000}
+
 @media(max-width:760px){
   body{padding:14px 12px 40px}
   .wrap{gap:12px}
@@ -497,6 +504,7 @@ footer li+li{margin-top:5px}
       </div>
     </div>
     <select id="function" aria-label="Function"></select>
+    <select id="sort" aria-label="Sort roles" title="Sort the role list"><option value="">Sort: soonest deadline</option><option value="new">Sort: newest posted</option></select>
     <label class="tog" id="allWrap"><input type="checkbox" id="allchk"> Show all roles</label>
     <label class="tog" id="visaWrap" title="Hides roles whose posting says they won't sponsor a visa. Roles that don't mention visas stay."><input type="checkbox" id="visa"> Hide no visa sponsorship</label>
   </section>
@@ -532,7 +540,7 @@ footer li+li{margin-top:5px}
   const state = { roles: [], companies: {}, meta: null, mine: {}, uid: undefined, canTrack: false, denied: false,
     track: "tech", stage: "Applied", pAll: false, aliasOf: {}, changes: [], seenAt: null, triaged: {}, itrack: "",
     trackerLoaded: false, trackerExists: false, open: new Set(), popen: new Set(), nopen: new Set(), pending: false, coCounts: new Map(),
-    visa: {}, events: [], evFav: {}, evAll: false, f: { q:"", cos:[], fn:"", all:false, visaHide:false } };
+    visa: {}, events: [], evFav: {}, evAll: false, f: { q:"", cos:[], fn:"", all:false, visaHide:false, sort:"" } };
   const $ = id => document.getElementById(id);
   const el = (tag, cls, text) => { const n=document.createElement(tag); if(cls) n.className=cls; if(text!=null) n.textContent=text; return n; };
 
@@ -614,6 +622,8 @@ footer li+li{margin-top:5px}
     [["BCP",r.boothUrl],["LinkedIn",r.linkedinUrl],["Company site",r.companyUrl]].forEach(([t,u]) => { if (!u) return; const a = el("a",null,t); a.href = u; a.target = "_blank"; a.rel = "noopener"; box.appendChild(a); });
     return box; }
   function opensAt(r){ if (!r.opensAt) return null; const t = new Date(r.opensAt); return isNaN(t) || t <= NOW ? null : t; }
+  // When the posting went up: Booth's posted date, else the day the board first found it.
+  const postedOf = r => String(r.posted || r.firstSeen || "").slice(0,10);
   function whenBox(r, cls){
     const w = el("div", "when" + (cls ? " " + cls : "")); w.appendChild(el("span","lbl-sm","Deadline"));
     const d = daysLeft(r), op = opensAt(r);
@@ -695,7 +705,8 @@ footer li+li{margin-top:5px}
     const inbox = state.track === "new";
     const evs = state.track === "events";
     $("filters").hidden = inbox; $("ibar").hidden = !inbox;
-    ["function","allWrap","visaWrap"].forEach(id => { $(id).hidden = evs; });
+    ["function","sort","allWrap","visaWrap"].forEach(id => { $(id).hidden = evs; });
+    $("sort").value = state.f.sort || ""; $("sort").classList.toggle("active", !!state.f.sort);
     $("q").placeholder = evs ? "Search company or event" : "Search company, role, or city"; $("tabnote").hidden = !(inbox || evs);
     $("tabnote").textContent = "Roles added since you last pressed Clear. Save the ones you like to your pipeline and skip the rest (or swipe right and left on a phone). Anything you don't touch stays here and new roles pile on until you press Clear.";
     document.querySelectorAll(".track button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.track === state.track)));
@@ -729,6 +740,7 @@ footer li+li{margin-top:5px}
   $("function").addEventListener("change", e => { state.f.fn = e.target.value; save(); syncControls(); render(); });
   $("allchk").addEventListener("change", e => { state.f.all = e.target.checked; save(); syncControls(); render(); });
   $("evallchk").addEventListener("change", e => { state.evAll = e.target.checked; render(); });
+  $("sort").addEventListener("change", e => { state.f.sort = e.target.value; save(); syncControls(); render(); });
   $("visa").addEventListener("change", e => { state.f.visaHide = e.target.checked; save(); syncControls(); render(); });
   $("clear").addEventListener("click", () => { Object.assign(state.f,{q:"",cos:[],fn:"",visaHide:false}); save(); syncControls(); render(); });
 
@@ -862,14 +874,17 @@ footer li+li{margin-top:5px}
     });
     const dl = r => { const d = daysLeft(r); return d === null ? 9999 : d; };
     const fresh = r => isNew(r) && !isClosed(r) && !opensAt(r) && !state.triaged[r.key] && !wasTracked(r.key);
-    rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || (fresh(b) - fresh(a)) || (opensAt(a) && opensAt(b) ? opensAt(a) - opensAt(b) : 0) || dl(a)-dl(b) || coName(a).localeCompare(coName(b)) || a.title.localeCompare(b.title));
+    const byNew = f.sort === "new";
+    if (byNew) rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || postedOf(b).localeCompare(postedOf(a)) || dl(a)-dl(b) || coName(a).localeCompare(coName(b)) || a.title.localeCompare(b.title));
+    else rows.sort((a,b) => (!!opensAt(a) - !!opensAt(b)) || (fresh(b) - fresh(a)) || (opensAt(a) && opensAt(b) ? opensAt(a) - opensAt(b) : 0) || dl(a)-dl(b) || coName(a).localeCompare(coName(b)) || a.title.localeCompare(b.title));
+    const order = byNew ? "newest posted first" : "soonest deadline first";
     state.shown = rows;
     const filtered = !!(f.q || f.cos.length || f.fn || f.visaHide);
     $("clear").hidden = !filtered;
     $("allchk").checked = !!f.all; $("allWrap").classList.toggle("active", !!f.all);
     const tname = state.track === "tech" ? "Tech" : "Corporate";
-    $("count").textContent = !state.roles.length ? "" : f.all ? (filtered ? `${rows.length} of ${base.filter(r=>!isClosed(r)).length} open roles` : `${rows.length} open roles, soonest deadline first`)
-      : `${rows.length} of your ${tname.toLowerCase()} roles (favorited and applied), soonest deadline first`;
+    $("count").textContent = !state.roles.length ? "" : f.all ? (filtered ? `${rows.length} of ${base.filter(r=>!isClosed(r)).length} open roles` : `${rows.length} open roles, ${order}`)
+      : `${rows.length} of your ${tname.toLowerCase()} roles (favorited and applied), ${order}`;
     if (!rows.length){ const em = el("div","empty", !state.roles.length ? (state.slow ? SLOW_MSG : "Loading roles…") : f.all ? "No roles match these filters." : filtered ? "None of your favorites match these filters." : `No ${tname.toLowerCase()} favorites yet. Star roles in the New tab, or browse everything here.`);
       if (state.roles.length && !f.all){ em.appendChild(document.createElement("br")); const b = el("button","all-btn","Show all roles"); b.type = "button"; b.addEventListener("click", () => { state.f.all = true; save(); render(); }); em.appendChild(b); }
       list.appendChild(em); return; }
@@ -898,7 +913,9 @@ footer li+li{margin-top:5px}
       if (isClosed(r)) tg.appendChild(tag("plain","Closed"));
       if (tg.childNodes.length) main.appendChild(tg);
       row.appendChild(main);
-      row.appendChild(whenBox(r));
+      const wb = whenBox(r);
+      if (state.f.sort === "new" && postedOf(r)) wb.appendChild(el("span","posted","Posted " + fmtShort(postedOf(r))));
+      row.appendChild(wb);
       const links = linkSet(r);
       const isOpen = state.open.has(r.key);
       const d = el("button",null, isOpen ? "Hide" : "Details"); d.type = "button"; d.setAttribute("aria-expanded", String(isOpen));
