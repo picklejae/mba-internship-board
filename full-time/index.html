@@ -488,7 +488,7 @@ body.signed-out{background:#800000;min-height:100vh}
     <div class="pipe-body" id="pipe-body" hidden>
       <div class="pipe-note" id="pipe-note">Only you can see this.</div>
       <ol class="steps" id="steps"></ol>
-      <div class="psearch" role="search"><input id="pq" type="search" placeholder="Search my pipeline: company, role, or city" aria-label="Search my pipeline"><button type="button" class="pclear" id="pq-clear" hidden>Clear</button></div>
+      <div class="psearch" id="psearch" role="search"><input id="pq" type="search" placeholder="Search my applied roles: company, role, or city" aria-label="Search my applied roles"><button type="button" class="pclear" id="pq-clear" hidden>Clear</button></div>
       <div class="pcards" id="pcards"></div>
     </div>
   </section>
@@ -817,7 +817,9 @@ body.signed-out{background:#800000;min-height:100vh}
   $("pq-clear").addEventListener("click", () => { pq = ""; $("pq").value = ""; $("pq-clear").hidden = true; renderPipe(); $("pq").focus(); });
   function renderPipe(){
     const P0 = pipeline(), steps = $("steps"); steps.textContent = "";
-    const P = {}; Object.keys(P0).forEach(s => { P[s] = P0[s].filter(pqMatch); });
+    // The search box only filters the Applied stage; the other stages always show everything.
+    const P = {}; Object.keys(P0).forEach(s => { P[s] = s === "Applied" ? P0[s].filter(pqMatch) : P0[s]; });
+    $("psearch").hidden = state.stage !== "Applied";
     $("pipe-sum").textContent = !state.trackerLoaded ? "" :
       STAGES.map(([s, label]) => `${P0[s].length} ${label.replace("★ ","").toLowerCase()}`).join(" · ");
     STAGES.forEach(([s, label]) => { const li = el("li"); const b = el("button","step"); b.type = "button";
@@ -834,8 +836,7 @@ body.signed-out{background:#800000;min-height:100vh}
     const total = STAGES.reduce((a,[s]) => a + P0[s].length, 0);
     if (!total){ box.appendChild(el("div","pempty","Nothing applied yet. Hit Mark applied on a role below and track it here through interviews and offers.")); return; }
     const items = P[state.stage];
-    if (pq && !items.length){ const hits = STAGES.filter(([s]) => P[s].length).map(([s,l]) => `${P[s].length} in ${l}`);
-      box.appendChild(el("div","pempty", hits.length ? `No match in ${STAGES.find(x=>x[0]===state.stage)[1]} for “${pq}”. Found ${hits.join(", ")}: tap that stage above.` : `Nothing in your pipeline matches “${pq}”.`)); return; }
+    if (pq && state.stage === "Applied" && P0.Applied.length && !items.length){ box.appendChild(el("div","pempty", `No applied roles match “${pq}”.`)); return; }
     if (!items.length){ box.appendChild(el("div","pempty", state.stage === "Interested" ? "No favorites waiting. Tap ☆ next to a role below to add one." : `Nothing at ${STAGES.find(x=>x[0]===state.stage)[1]} yet. Move a role here with one click from the stage before it.`)); return; }
     const shown = items;
     const can = canWrite();
