@@ -466,6 +466,11 @@ body.signed-out{background:#800000;min-height:100vh}
 .jdmore{padding:6px 0 0;color:var(--brand);font-weight:700}
 .fulltog{margin-top:10px;color:var(--brand);font-weight:700}
 .jdtext{max-height:520px;line-height:1.65}
+.jdsum.full p{margin:0;line-height:1.6}
+.jdsum.full .jdbody{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.jdsum.full .jdbody ul{display:flex;flex-direction:column}
+.jdsum.full details.jdsec summary{cursor:pointer;font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.jdsum.full details.jdsec[open] summary{margin-bottom:9px;color:var(--brand)}
 @media(max-width:760px){.detail{grid-template-columns:1fr}.facts{margin-bottom:0}}
 
 .demo-tag{display:inline-block;vertical-align:middle;margin-left:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--warn);border-radius:999px;padding:3px 10px;position:relative;top:-3px}
@@ -539,6 +544,7 @@ body.signed-out{background:#800000;min-height:100vh}
 
 <script>window.IC_BOARD = { prefix: "ft-", title: "Full-Time Compiler", sub: "Post-MBA full-time roles (Class of 2027) at tech and corporate employers, for Booth students." };</script>
 <script src="ft-shim.js"></script>
+<script src="../jd-sections.js"></script>
 <script>
 (function(){
   const SLOW_MSG = "Still loading. Check your connection and refresh the page.";
@@ -1242,6 +1248,29 @@ body.signed-out{background:#800000;min-height:100vh}
     box._found = found; return box;
   }
 
+  // The whole posting, split into the employer's own sections (headings, paragraphs, bullets).
+  // Pay/EEO/company-boilerplate sections start folded.
+  const JD_MINOR = /^(additional (information|compensation)|benefits|perks|compensation|pay|salary|equal|eeo|who we are|why join|our (company|culture|values|commitment)|disclaimer|work in a way|legal|accommodation)/i;
+  function jdSectionsView(secs){
+    const box = el("div","jdsum full"), SHOW = 8;
+    secs.forEach((s, i) => {
+      const minor = i > 0 && s.h && (JD_MINOR.test(s.h) || (/^About [A-Z]/.test(s.h) && !/^About (the|this|you|your)\b/i.test(s.h)));
+      const body = el("div","jdbody"); let ul = null, n = 0;
+      s.b.forEach(x => { if (x.li){ if (!ul){ ul = el("ul"); body.appendChild(ul); } const li = el("li",null,x.t); if (!minor && ++n > SHOW) li.hidden = true; ul.appendChild(li); }
+        else { ul = null; body.appendChild(el("p",null,x.t)); } });
+      if (!minor && n > SHOW){ const more = el("button","jdmore",`Show ${n - SHOW} more`); more.type = "button";
+        more.addEventListener("click", () => { const open = more.dataset.open === "1"; let k = 0;
+          body.querySelectorAll("li").forEach(li => { if (++k > SHOW) li.hidden = open; });
+          more.dataset.open = open ? "" : "1"; more.textContent = open ? `Show ${n - SHOW} more` : "Show fewer"; });
+        body.appendChild(more); }
+      if (minor){ const d = document.createElement("details"); d.className = "jdsec"; d.appendChild(el("summary",null,s.h)); d.appendChild(body); box.appendChild(d); }
+      else { const d = el("div","jdsec"); if (s.h) d.appendChild(el("h4",null,s.h)); d.appendChild(body); box.appendChild(d); }
+    });
+    return box;
+  }
+  const jdSecsOf = (shared, text) => (shared && Array.isArray(shared.sections) && shared.sections.length) ? shared.sections
+    : (window.jdSections ? window.jdSections.fromText(text) : null);
+
   // ---------- details: job description, notes, history
   const jdCache = new Map(), prepCache = new Map(), detailEls = new Map(), prepTimers = new Map();
   let dbRef = null;
@@ -1328,9 +1357,11 @@ body.signed-out{background:#800000;min-height:100vh}
         if (payv.textContent === "Not listed") payv.parentNode.classList.add("muted");
         schv.textContent = findSchedule(r, jdText) || "Not stated";
         if (schv.textContent === "Not stated") schv.parentNode.classList.add("muted");
-        if (shared && shared.text){ jd.textContent = shared.text; src.textContent = "From " + (shared.source || "the posting") + (shared.capturedAt ? ", saved " + fmtHistDay(shared.capturedAt) : "");
-          showSummary(shared.text); }
-        else if (mine.jd){ jd.hidden = true; paste.hidden = false; paste.value = mine.jd; src.textContent = "Pasted by you"; showSummary(mine.jd); ftog.hidden = true; }
+        const secs = shared && shared.text ? jdSecsOf(shared, shared.text) : (mine.jd ? jdSecsOf(null, mine.jd) : null);
+        if (shared && shared.text){ src.textContent = "From " + (shared.source || "the posting") + (shared.capturedAt ? ", saved " + fmtHistDay(shared.capturedAt) : "");
+          if (secs){ jd.textContent = window.jdSections.toText(secs); jd.hidden = true; ftog.hidden = true; sumWrap.textContent = ""; sumWrap.appendChild(jdSectionsView(secs)); }
+          else { jd.textContent = shared.text; showSummary(shared.text); } }
+        else if (mine.jd){ jd.hidden = true; paste.hidden = false; paste.value = mine.jd; src.textContent = "Pasted by you"; if (secs){ sumWrap.textContent = ""; sumWrap.appendChild(jdSectionsView(secs)); } else showSummary(mine.jd); ftog.hidden = true; }
         else { jd.hidden = true; paste.hidden = false; src.textContent = r.boothUrl ? "" : "Not saved automatically for LinkedIn and company-site postings"; }
       });
       detailEls.set(ck, box);
