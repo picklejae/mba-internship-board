@@ -103,7 +103,7 @@ The board went through **30 published versions in about three weeks** (Sept 24 t
 
 ## How it was built
 
-I acted as the product owner: I defined the problem, set the requirements, ran feedback with classmates, and made every scope and design call. The build was done with **Claude**, Anthropic's AI assistant, as the engineer. Claude wrote the code and the refresh jobs, and I directed and reviewed each iteration. Working this way let me go from idea to a tool classmates use daily in a few weeks, without slowing down recruiting.
+I acted as the product owner: I defined the problem, set the requirements, ran feedback with classmates, and made every scope and design call. That let me go from idea to a tool classmates use daily in a few weeks, without slowing down recruiting.
 
 ## Run the demo locally
 
